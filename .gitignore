@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+dist/
+build/
+.svelte-kit/
+
+# Tauri
+src-tauri/target/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+
+# Env
+.env
+.env.*
+
