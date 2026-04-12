@@ -2,6 +2,11 @@
 
 This document helps AI agents understand and work with OrganizationLaunchpad.
 
+> **New to this repo?** If you haven't set up Supabase, Cloudflare, or deployed yet,
+> follow the [Agent Guide](agent-guide.md) first.
+
+---
+
 ## Project Overview
 
 **What it is:** A production shell for AI-generated apps. Users clone this repo, drop in their frontend, and get auth, analytics, and deployment pre-wired.
@@ -9,6 +14,8 @@ This document helps AI agents understand and work with OrganizationLaunchpad.
 **Auth model:** Multiple apps can share one Supabase project. User identity is shared through the same `auth.users` records, but browser sessions are app/domain-specific, so each app may require its own login.
 
 **Portable auth shell:** Shared auth code belongs in `shared/auth`, not inside any individual app. Example apps should consume that shell rather than owning auth UI and session logic directly.
+
+**Beta test target:** `apps/web` is the reference app used for first external testing. Imported apps should be integrated locally first, then promoted into CI/deploy once verified.
 
 **The flow:**
 
@@ -19,9 +26,7 @@ This document helps AI agents understand and work with OrganizationLaunchpad.
 
 ---
 
-## Core Concepts
-
-### Monorepo Structure
+## Monorepo Structure
 
 ```
 apps/              # User apps (drop-ins)
@@ -35,8 +40,14 @@ apps/              # User apps (drop-ins)
 supabase/
   ├── functions/            # Edge Functions (backend logic)
   └── migrations/           # Auth schema, RLS policies
+shared/
+  └── auth/                 # Portable auth shell (Web Components + client)
 infra/terraform/            # Cloudflare DNS
 ```
+
+---
+
+## Core Concepts
 
 ### Adapter Pattern
 
@@ -60,8 +71,6 @@ src/
 **Why:** If we swap PostHog for Mixpanel, only the adapter changes. No app code touches vendor SDKs directly.
 
 ### Environment Variables
-
-Two types of vars:
 
 **Build-time (VITE\_\*)** — needed at frontend build:
 
@@ -161,6 +170,7 @@ git push → GitHub Actions →
 | File                   | Purpose                           |
 | ---------------------- | --------------------------------- |
 | `AGENTS.md`            | This file — AI agent instructions |
+| `agent-guide.md`       | User-facing setup walkthrough     |
 | `.env.example`         | Environment variable template     |
 | `supabase/config.toml` | Supabase local config             |
 | `infra/terraform/`     | Cloudflare infrastructure         |
@@ -234,15 +244,72 @@ Environment variables needed in GitHub Secrets:
 
 ---
 
-## Troubleshooting
+## Architecture Patterns
 
-**App not building:** Check that `apps/<name>/package.json` has correct workspace reference and that all env vars are set.
+### Domain Layer
 
-**Auth not working:** Verify Supabase URL and anon key are correct in `.env.local`. Confirm the app's domain is configured in Supabase redirect/auth settings, and check RLS policies allow the operation.
+Business rules and domain models go in framework-free modules. The domain layer should not depend on:
 
-**Users can log into one app but not another:** This is expected unless both apps are correctly configured against the same Supabase project and each app has its own valid auth redirect URLs.
+- Svelte, Cloudflare Worker runtime APIs, Supabase client libraries, Tauri APIs, or Terraform concerns
 
-**Deploy failing:** Check Cloudflare Pages build settings match the npm scripts. Ensure `apps/web/dist` exists after build.
+Domain code should express: entities, value objects, use-case rules, invariants, and domain services.
+
+### Application Layer
+
+The application layer coordinates use cases and defines ports for:
+
+- user repositories, session/auth services, billing providers, notification services, file storage, external API clients
+
+Application code depends on ports, not providers.
+
+### Adapters
+
+Adapters implement the ports defined in the application layer. Examples:
+
+- Supabase adapter for auth and persistence
+- PostHog adapter for analytics
+- Resend adapter for transactional email
+- Stripe adapter for payments
+
+Adapters are the only place vendor-specific code belongs.
+
+### Workers
+
+Workers stay thin — they mostly:
+
+1. Parse the request
+2. Authenticate it
+3. Call an application use case
+4. Translate the result into an HTTP response
+
+Do not let Workers become the place where all business logic accumulates.
+
+### Decision Rules
+
+- Prefer simple ports over leaking SDK types throughout the codebase
+- Prefer static generation and edge-friendly deployment models
+- Prefer one clear responsibility per adapter
+- Prefer explicit environment variable contracts
+- Prefer composition over hidden framework magic
+
+### What to Avoid
+
+- Business logic inside Svelte components
+- Business logic inside Cloudflare request handlers
+- Direct vendor SDK calls scattered across the app
+- Coupling core application flow to Supabase table shapes
+- Mixing deployment concerns with domain rules
+
+### Definition of Done for New Apps
+
+A new app is in good shape when:
+
+- Frontend can be built as static assets
+- Core use cases can be reasoned about without framework knowledge
+- Worker handlers are thin
+- Supabase is isolated behind clear boundaries where practical
+- Infrastructure assumptions are documented and reproducible
+- Required API keys and setup steps are documented in `docs/api-keys/`
 
 ---
 

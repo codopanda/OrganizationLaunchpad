@@ -1,150 +1,45 @@
 # OrganizationLaunchpad
 
-Turn AI-generated "vibecoded" apps into production-ready SaaS. Drop your frontend in, get auth, CI/CD, and deployment pre-wired.
+Turn AI-generated "vibecoded" apps into production-ready SaaS. Bring your frontend, add auth with minimal intervention, and get a deployable shell around it.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## The Problem
+## Quick Start
 
-AI-generated apps work locally but fail in production. They skip auth, CI/CD, and proper infrastructure. OrganizationLaunchpad is the production shell that fills the gap.
+Read the [Agent Guide](https://raw.githubusercontent.com/codopanda/OrganizationLaunchpad/refs/heads/main/agent-guide.md) for full setup instructions.
 
-## How It Works
-
-1. **Clone** this repo — you get a monorepo with auth + deployment pre-wired
-2. **Drop** your frontend (Svelte, React, Vue, htmx — any framework) into `apps/`
-3. **Configure** your shared Supabase project and Cloudflare deployment
-4. **Ship** — GitHub Actions handles CI/CD to Cloudflare Pages
-
-The scaffold handles the boring stuff so you can focus on your app.
-
----
-
-## Get Started
+**Already have GitHub set up?** Clone this repo into your current folder:
 
 ```bash
-# Clone the template
-git clone https://github.com/anomalyco/organization-launchpad && cd organization-launchpad
-
-# Install dependencies
-npm install
-
-# Copy environment template
-cp .env.example .env.local
-
-# Edit .env.local with your:
-# - Supabase URL + anon key
-# - Cloudflare account details
-
-# Start development
-npm run dev:web
+git clone https://github.com/codopanda/OrganizationLaunchpad.git .
 ```
 
-See [docs/setup-guide.md](docs/setup-guide.md) for detailed setup.
+Then follow the Agent Guide above for the rest.
 
 ---
 
-## MVP — GitHub to Cloudflare Pages
+## What You Get
 
-One-command deployment from GitHub to Cloudflare Pages with full auth out of the box.
-
-**What's included:**
-
-- Email/password authentication via Supabase
-- Google OAuth (SSO)
+- Email/password + Google OAuth via Supabase
 - GitHub Actions CI/CD
 - Cloudflare Pages deployment
 - Database with Row Level Security (RLS)
-- User profiles with avatar upload
-- Support for multiple apps sharing one Supabase project
+- A shared auth shell you can attach to any existing app
 
 **Stack:** GitHub, Cloudflare Pages, Supabase (Auth + Database)
 
 ---
 
-## Architecture
-
-```
-organization-launchpad/
-├── apps/
-│   └── web/                    # Default frontend; add more apps alongside it
-│       ├── src/
-│       │   ├── domain/         # Business logic (framework-free)
-│       │   ├── application/    # Use cases, ports
-│       │   ├── adapters/       # Auth, storage adapters
-│       │   └── ui/             # Your components
-│       └── src-tauri/          # Optional: Tauri desktop packaging
-├── supabase/
-│   ├── functions/              # Edge Functions
-│   └── migrations/             # Auth schema + RLS policies
-├── infra/terraform/            # Cloudflare DNS
-└── docs/                       # Setup guides + AGENTS.md
-```
-
-**Design principles:**
-
-- Adapters are framework-agnostic — works with any frontend
-- Multiple apps can use the same Supabase project
-- Each app/domain keeps its own login session
-- Shared user data should be keyed by the same `auth.users.id`
-- Infrastructure as code — no manual dashboard configuration
-
----
-
-## Multi-App Auth Model
-
-This scaffold is designed for a shared-Supabase, per-app-login setup:
-
-- All apps can point to the same Supabase project
-- Users are the same Supabase users across every app
-- Each app or domain manages its own browser session, so users may need to log in separately on each site
-- Shared data lives in common tables keyed by `auth.users.id`
-- App-specific data should include an `app_id` or similar scope column when needed
-
-This is intentional. The repo assumes shared identity and shared database records where appropriate, not automatic cross-domain session sharing.
-
----
-
-## Portable Auth Shell
-
-Auth is now split out of the example app into [`shared/auth`](/Users/binam/Documents/projects/OrganizationLaunchpad/shared/auth:1).
-
-- The auth core is framework-agnostic TypeScript
-- The portable UI is exposed as Web Components
-- The example app in `apps/web` consumes the shared shell instead of owning login/signup itself
-
-For an existing app, the intended integration is:
-
-1. Point the app at the shared Supabase project
-2. Initialize the shared auth client
-3. Mount shared `/login`, `/signup`, and `/auth/callback` screens
-4. Wrap protected content with the shared auth guard
-
-See [docs/add-auth-to-existing-app.md](docs/add-auth-to-existing-app.md).
-
----
-
 ## Documentation
 
-| Guide                                | When to Read          |
-| ------------------------------------ | --------------------- |
-| [Setup Guide](docs/setup-guide.md)   | Initial setup         |
-| [AGENTS.md](AGENTS.md)               | AI agent instructions |
-| [Architecture](docs/architecture.md) | Code structure        |
-| [Deployment](docs/deployment.md)     | Production deployment |
-
----
-
-## AI Agent Support
-
-This repo is designed for AI agents to understand and maintain. See [AGENTS.md](AGENTS.md) for:
-
-- Project structure overview
-- How to add new apps
-- How to wire up services
-- Deployment workflow
+| Guide                                                                                                           | When to Read                     |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| [Agent Guide](https://raw.githubusercontent.com/codopanda/OrganizationLaunchpad/refs/heads/main/agent-guide.md) | Initial setup + AI agent support |
+| [Architecture](docs/architecture.md)                                                                            | Code structure                   |
+| [Deployment](docs/deployment.md)                                                                                | Production deployment            |
 
 ---
 

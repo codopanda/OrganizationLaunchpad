@@ -2,6 +2,8 @@
 
 This repo now exposes a shared auth shell in `shared/auth` so login does not need to live inside a specific example app.
 
+Read [setup-guide.md](./setup-guide.md) first to verify the reference app works before attaching auth to your own app.
+
 ## What You Reuse
 
 - `shared/auth/client.ts` for Supabase auth client and session state
@@ -40,6 +42,18 @@ export const auth = configureOrganizationLaunchpadAuth({
 });
 
 defineOrganizationLaunchpadAuthElements();
+```
+
+## Suggested Agent Prompt
+
+Use something this specific when asking an agent to wire auth into an imported app:
+
+```text
+Attach OrganizationLaunchpad shared auth to this app.
+Keep the existing app UI intact.
+Add /login, /signup, and /auth/callback routes.
+Protect only the authenticated area and redirect unauthenticated users to /login.
+Use shared/auth for session handling and the portable auth elements for the auth screens.
 ```
 
 ## Reference UI Mounting

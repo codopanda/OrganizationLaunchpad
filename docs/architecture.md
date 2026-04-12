@@ -95,135 +95,50 @@ This store contains **no imports** from Svelte, Supabase, or any external librar
 
 ---
 
-## Application Layer
+## Shared Auth Layer
 
-**Location**: `apps/web/src/application/`
+**Location**: `shared/auth/`
 
-The application layer defines **ports** (interfaces) that represent how the application can be driven (used). It also contains use case orchestration logic.
+Authentication now lives in a shared framework-agnostic shell instead of app-local adapters and ports.
 
-### Ports (Driving Adapters)
-
-Ports are interfaces that define the contract between the application core and the outside world:
+### What Lives Here
 
 ```
-application/
-├── ports/
-│   └── driving/
-│       └── IAuthService.ts    # Interface for auth operations
+shared/auth/
+├── client.ts      # Supabase-backed auth client and session state
+├── elements.ts    # Portable Web Component auth UI
+├── index.ts       # Public exports
+└── types.ts       # Shared auth types
 ```
 
-### Example: IAuthService Interface
+### Example: Shared Auth Bootstrap
 
 ```typescript
-// apps/web/src/application/ports/driving/IAuthService.ts
+import {
+  configureOrganizationLaunchpadAuth,
+  defineOrganizationLaunchpadAuthElements,
+} from '@shared/auth';
 
-export interface User {
-  id: string;
-  email: string;
-  emailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+export const auth = configureOrganizationLaunchpadAuth({
+  supabaseUrl: import.meta.env.VITE_PUBLIC_SUPABASE_URL ?? '',
+  supabaseAnonKey: import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  callbackPath: '/auth/callback',
+  loginPath: '/login',
+  signupPath: '/signup',
+  postLoginPath: '/dashboard',
+  postLogoutPath: '/',
+});
 
-export interface AuthSession {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  expires_at: number;
-  user: User | null;
-}
-
-export interface IAuthService {
-  signUp(credentials: SignUpCredentials): Promise<AuthResult>;
-  signIn(credentials: SignInCredentials): Promise<AuthResult>;
-  signOut(): Promise<{ error: AuthError | null }>;
-  getSession(): Promise<{ session: AuthSession | null }>;
-  onAuthStateChange(callback: AuthStateCallback): () => void;
-}
-```
-
-### Application Service (Factory)
-
-```typescript
-// apps/web/src/application/auth.ts
-
-import { SupabaseAuthAdapter } from '@/adapters/secondary/supabase/SupabaseAuthAdapter';
-import type { IAuthService } from '@/application/ports/driving/IAuthService';
-
-let _authService: IAuthService | null = null;
-
-export function getAuthService(): IAuthService {
-  if (!_authService) {
-    if (!isSupabaseConfigured) {
-      throw new Error('Auth not configured...');
-    }
-    _authService = new SupabaseAuthAdapter(getSupabase());
-  }
-  return _authService;
-}
+defineOrganizationLaunchpadAuthElements();
 ```
 
 ---
 
-## Adapters Layer
+## App Integration Layer
 
-**Location**: `apps/web/src/adapters/`
+**Location**: `apps/web/src/`
 
-Adapters implement the ports defined in the application layer. They are the **secondary (driven) adapters** that handle external concerns.
-
-### Adapter Types
-
-| Type | Purpose | Example |
-|------|---------|---------|
-| **Primary (Driving)** | Receives requests from external actors | Svelte components calling `authService.signIn()` |
-| **Secondary (Driven)** | Performs operations on external systems | `SupabaseAuthAdapter` calling Supabase API |
-
-### Example: Supabase Auth Adapter
-
-```typescript
-// apps/web/src/adapters/secondary/supabase/SupabaseAuthAdapter.ts
-
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { IAuthService } from '@/application/ports/driving/IAuthService';
-
-export class SupabaseAuthAdapter implements IAuthService {
-  constructor(private readonly supabase: SupabaseClient) {}
-
-  async signIn(credentials: SignInCredentials): Promise<AuthResult> {
-    const { data, error } = await this.supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
-    });
-
-    if (error) {
-      return { user: null, session: null, error: { message: error.message } };
-    }
-
-    return {
-      user: this.mapUser(data.user),
-      session: this.mapSession(data.session),
-      error: null,
-    };
-  }
-
-  private mapUser(user: unknown): User | null {
-    if (!user) return null;
-    const u = user as { id: string; email: string; ... };
-    return {
-      id: u.id,
-      email: u.email,
-      emailVerified: Boolean(u.email_confirmed_at),
-      ...
-    };
-  }
-}
-```
-
-This adapter:
-- **Implements** `IAuthService`
-- **Depends on** Supabase client
-- **Maps** vendor-specific types to application types
-- **Contains no business logic** - only translation and delegation
+The reference app consumes the shared auth shell instead of owning its own auth implementation. In other apps, this layer is where you mount the auth routes and guard protected content.
 
 ---
 
@@ -231,49 +146,27 @@ This adapter:
 
 **Location**: `apps/web/src/ui/`
 
-The UI layer contains Svelte components that handle presentation and user interaction. Components should be **thin** - they delegate to application services and handle rendering only.
+The UI layer contains Svelte components that handle presentation and user interaction. Components should be **thin** and, for auth, prefer mounting the shared auth shell instead of duplicating auth UI.
 
 ### UI Folder Structure
 
 ```
 ui/
-├── components/       # Reusable UI components (LoginForm, Toast, etc.)
+├── components/       # Reusable UI components (Toast, etc.)
 ├── pages/           # Page-level components (LoginPage, DashboardPage)
 ├── stores/          # Svelte 5 runes-based state management
 └── kitchen/         # Feature-specific widgets with tests
 ```
 
-### Example: Login Form Using Application Service
+### Example: Login Page Using Shared Auth Element
 
 ```svelte
-<!-- apps/web/src/ui/components/LoginForm.svelte -->
+<!-- apps/web/src/ui/pages/LoginPage.svelte -->
 
-<script lang="ts">
-  import { authService } from '@/application/auth';
-
-  let email = $state('');
-  let password = $state('');
-
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
-    if (!authService) return;
-
-    const result = await authService.signIn({ email, password });
-
-    if (result.error) {
-      error = result.error.message;
-      return;
-    }
-
-    onSuccess?.();
-  }
-</script>
-
-<form onsubmit={handleSubmit}>
-  <input type="email" bind:value={email} />
-  <input type="password" bind:value={password} />
-  <button type="submit">Sign In</button>
-</form>
+<organization-launchpad-auth-form
+  mode="login"
+  success-path="/dashboard"
+></organization-launchpad-auth-form>
 ```
 
 ### Store Pattern
@@ -281,8 +174,8 @@ ui/
 ```typescript
 // apps/web/src/ui/stores/auth.svelte.ts
 
-import { authService } from '@/application/auth';
-import type { User, AuthSession } from '@/application/ports/driving/IAuthService';
+import { auth as authClient } from '@/lib/auth';
+import type { User, AuthSession } from '@shared/auth';
 
 interface AuthState {
   user: User | null;
@@ -299,9 +192,9 @@ let state = $state<AuthState>({
 });
 
 export async function signIn(email: string, password: string) {
-  if (!authService) return { error: { message: 'Auth not configured' } };
+  if (!authClient.isConfigured) return { error: { message: 'Auth not configured' } };
   state.isLoading = true;
-  const result = await authService.signIn({ email, password });
+  const result = await authClient.signIn({ email, password });
   state.isLoading = false;
   return result;
 }
@@ -356,89 +249,22 @@ export async function signIn(email: string, password: string) {
 
 | Direction | Allowed | Example |
 |-----------|--------|---------|
-| UI → Application | Yes | `LoginForm` calls `authService.signIn()` |
+| UI → Shared Auth | Yes | `LoginPage` mounts `<organization-launchpad-auth-form>` |
 | Application → Domain | Yes | Use cases use domain entities |
-| Application → Adapters | No | Application defines ports, adapters implement them |
+| Shared Auth → Supabase | Yes | `shared/auth/client.ts` talks to Supabase |
 | Domain → Anywhere | No | Domain is pure, no external imports |
 
 ---
 
 ## Example: Authentication Flow
 
-Here's how a sign-in request flows through all layers:
+Here's how sign-in works in the current repo:
 
-### 1. UI Layer (User Action)
-
-```svelte
-<!-- apps/web/src/ui/components/LoginForm.svelte -->
-
-const result = await authService.signIn({ email, password });
-```
-
-### 2. Application Port (Interface)
-
-```typescript
-// apps/web/src/application/ports/driving/IAuthService.ts
-
-export interface IAuthService {
-  signIn(credentials: SignInCredentials): Promise<AuthResult>;
-}
-```
-
-### 3. Application Service (Factory)
-
-```typescript
-// apps/web/src/application/auth.ts
-
-export const authService = isSupabaseConfigured
-  ? getAuthService()
-  : null;  // Returns SupabaseAuthAdapter implementation
-```
-
-### 4. Secondary Adapter (Supabase Implementation)
-
-```typescript
-// apps/web/src/adapters/secondary/supabase/SupabaseAuthAdapter.ts
-
-export class SupabaseAuthAdapter implements IAuthService {
-  async signIn(credentials: SignInCredentials): Promise<AuthResult> {
-    const { data, error } = await this.supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
-    });
-    // Map vendor response to application types
-    return { user: this.mapUser(data.user), session: this.mapSession(data.session), error: null };
-  }
-}
-```
-
-### Flow Diagram
-
-```
-User clicks "Sign In"
-        │
-        ▼
-┌───────────────────┐
-│  LoginForm.svelte │  (UI Layer)
-│  authService.si.. │  ◀── Interface reference
-└───────────────────┘
-        │
-        ▼
-┌───────────────────┐
-│ IAuthService      │  (Application Layer - Port)
-│ .signIn()         │
-└───────────────────┘
-        │
-        ▼
-┌───────────────────┐
-│ SupabaseAuth      │  (Adapters Layer - Secondary Adapter)
-│ Adapter           │
-│ .signIn()         │
-└───────────────────┘
-        │
-        ▼
-   Supabase API
-```
+1. `/login` renders the shared auth Web Component
+2. The component calls `shared/auth/client.ts`
+3. The shared client talks to Supabase Auth
+4. Session state updates the app-local auth store
+5. Protected pages use the auth guard or redirect behavior to require login
 
 ---
 
