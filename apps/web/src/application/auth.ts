@@ -1,17 +1,11 @@
-import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
-import { SupabaseAuthAdapter } from '@/adapters/secondary/supabase/SupabaseAuthAdapter';
-import type { IAuthService } from '@/application/ports/driving/IAuthService';
+import { auth, isSupabaseConfigured } from '@/lib/auth';
 
-let _authService: IAuthService | null = null;
-
-export function getAuthService(): IAuthService {
-  if (!_authService) {
-    if (!isSupabaseConfigured) {
-      throw new Error('Auth is not configured. Set VITE_PUBLIC_SUPABASE_URL and VITE_PUBLIC_SUPABASE_ANON_KEY');
-    }
-    _authService = new SupabaseAuthAdapter(getSupabase());
+export function getAuthService() {
+  if (!isSupabaseConfigured) {
+    throw new Error('Auth is not configured. Set VITE_PUBLIC_SUPABASE_URL and VITE_PUBLIC_SUPABASE_ANON_KEY');
   }
-  return _authService;
+
+  return auth;
 }
 
-export const authService = isSupabaseConfigured ? getAuthService() : null;
+export const authService = isSupabaseConfigured ? auth : null;

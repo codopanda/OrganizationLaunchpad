@@ -8,6 +8,8 @@ This document helps AI agents understand and work with OrganizationLaunchpad.
 
 **Auth model:** Multiple apps can share one Supabase project. User identity is shared through the same `auth.users` records, but browser sessions are app/domain-specific, so each app may require its own login.
 
+**Portable auth shell:** Shared auth code belongs in `shared/auth`, not inside any individual app. Example apps should consume that shell rather than owning auth UI and session logic directly.
+
 **The flow:**
 
 1. User clones the repo
@@ -126,10 +128,11 @@ git push → GitHub Actions →
 ### Set up authentication for a new app
 
 1. Ensure the app points at the shared Supabase URL and anon key
-2. Reuse the existing auth adapter pattern for that app
-3. Use sign-in flows locally within the app; do not assume session sharing across domains
-4. Protect app routes/components according to that app's requirements
-5. If the app needs shared user data, key tables by `auth.users.id`
+2. Initialize the shared auth shell from `shared/auth`
+3. Mount shared `/login`, `/signup`, and `/auth/callback` routes or equivalent screens
+4. Use sign-in flows locally within the app; do not assume session sharing across domains
+5. Protect app routes/components according to that app's requirements
+6. If the app needs shared user data, key tables by `auth.users.id`
 
 ### Configure analytics
 

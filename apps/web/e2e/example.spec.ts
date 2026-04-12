@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Homepage', () => {
   test('should display the app title', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/Scaifold/);
+    await expect(page).toHaveTitle(/OrganizationLaunchpad/);
   });
 });
 

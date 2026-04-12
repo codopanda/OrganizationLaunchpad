@@ -9,7 +9,7 @@ cloudflare_zone_id   = "paste-zone-id"
 subdomain_targets = {
   web = {
     type    = "CNAME"
-    content = "scaifold.pages.dev"
+    content = "organization-launchpad.pages.dev"
     proxied = true
   }
   api = {

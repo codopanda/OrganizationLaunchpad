@@ -1,5 +1,5 @@
-import { authService } from '@/application/auth';
-import type { User, AuthSession } from '@/application/ports/driving/IAuthService';
+import { auth as authClient } from '@/lib/auth';
+import type { User, AuthSession } from '@shared/auth';
 
 interface AuthState {
   user: User | null;
@@ -26,16 +26,16 @@ function setAuth(session: AuthSession | null) {
 
 export function initAuth() {
   if (unsubscribe) return;
-  if (!authService) {
+  if (!authClient.isConfigured) {
     state.isLoading = false;
     return;
   }
 
-  authService.getSession().then(({ session }) => {
+  authClient.getSession().then(({ session }) => {
     setAuth(session);
   });
 
-  unsubscribe = authService.onAuthStateChange((_event, session) => {
+  unsubscribe = authClient.onAuthStateChange((_event, session) => {
     setAuth(session);
   });
 }
@@ -63,32 +63,32 @@ export const auth = {
 };
 
 export async function signIn(email: string, password: string) {
-  if (!authService) return { error: { message: 'Auth not configured' } };
+  if (!authClient.isConfigured) return { error: { message: 'Auth not configured' } };
   state.isLoading = true;
-  const result = await authService.signIn({ email, password });
+  const result = await authClient.signIn({ email, password });
   state.isLoading = false;
   return result;
 }
 
 export async function signUp(email: string, password: string, options?: { emailRedirectTo?: string; data?: Record<string, unknown> }) {
-  if (!authService) return { error: { message: 'Auth not configured' } };
+  if (!authClient.isConfigured) return { error: { message: 'Auth not configured' } };
   state.isLoading = true;
-  const result = await authService.signUp({ email, password, options: options ?? {} });
+  const result = await authClient.signUp({ email, password, options: options ?? {} });
   state.isLoading = false;
   return result;
 }
 
 export async function signOut() {
-  if (!authService) return { error: { message: 'Auth not configured' } };
+  if (!authClient.isConfigured) return { error: { message: 'Auth not configured' } };
   state.isLoading = true;
-  const result = await authService.signOut();
+  const result = await authClient.signOut();
   state.isLoading = false;
   return result;
 }
 
 export async function signInWithGoogle(redirectTo?: string) {
-  if (!authService) return { error: { message: 'Auth not configured' } };
-  return authService.signInWithOAuth({
+  if (!authClient.isConfigured) return { error: { message: 'Auth not configured' } };
+  return authClient.signInWithOAuth({
     provider: 'google',
     options: redirectTo ? { redirectTo } : {},
   });

@@ -1,14 +1,7 @@
 <script lang="ts">
-  import { authService } from '@/application/auth';
-  import type { User } from '@/application/ports/driving/IAuthService';
-  import AuthGuard from '@/ui/components/AuthGuard.svelte';
+  import { auth as authClient } from '@/lib/auth';
+  import type { User } from '@shared/auth';
   import Toast from '@/ui/components/Toast.svelte';
-
-  interface Props {
-    children?: import('svelte').Snippet;
-  }
-
-  let { children }: Props = $props();
 
   let user = $state<User | null>(null);
   let loading = $state(true);
@@ -16,18 +9,17 @@
   let toastType = $state<'success' | 'error'>('error');
 
   $effect(() => {
-    if (!authService) {
+    if (!authClient.isConfigured) {
       loading = false;
       return;
     }
 
-    const { getCurrentUser } = authService;
-    getCurrentUser().then(({ user: u }) => {
-      user = u;
+    authClient.getCurrentUser().then(({ user: currentUser }) => {
+      user = currentUser;
       loading = false;
     });
 
-    const unsubscribe = authService.onAuthStateChange((event, session) => {
+    const unsubscribe = authClient.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
         user = session?.user ?? null;
       } else if (event === 'SIGNED_OUT') {
@@ -39,19 +31,21 @@
   });
 
   async function handleSignOut() {
-    if (!authService) return;
-    const { error } = await authService.signOut();
+    const { error } = await authClient.signOut();
+
     if (error) {
       toastMessage = error.message;
       toastType = 'error';
-    } else {
-      toastMessage = 'Successfully signed out!';
-      toastType = 'success';
+      return;
     }
+
+    toastMessage = 'Successfully signed out!';
+    toastType = 'success';
+    authClient.navigate(authClient.config.postLogoutPath);
   }
 </script>
 
-<AuthGuard>
+<organization-launchpad-auth-guard heading="Dashboard Access" message="Sign in to view the authenticated dashboard.">
   <div class="dashboard">
     <header class="header">
       <h1>Dashboard</h1>
@@ -76,7 +70,7 @@
       </section>
     </main>
   </div>
-</AuthGuard>
+</organization-launchpad-auth-guard>
 
 {#if toastMessage}
   <Toast message={toastMessage} type={toastType} onClose={() => (toastMessage = '')} />

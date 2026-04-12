@@ -23,7 +23,7 @@
     setTimeout(() => (notificationCount = Math.max(0, notificationCount - 1)), 5000);
   }
 
-  function handleFeedbackSubmit(rating: number) {
+  function handleFeedbackSubmit() {
     feedbackSubmitted = true;
     setTimeout(() => (feedbackSubmitted = false), 3000);
   }
@@ -64,7 +64,7 @@
 
     <section class="card">
       <h2>Feedback Widget</h2>
-      <FeedbackWidget onSubmit={handleFeedbackSubmit} />
+      <FeedbackWidget onSuccess={handleFeedbackSubmit} />
       {#if feedbackSubmitted}
         <p class="status success">Thank you for your feedback!</p>
       {/if}

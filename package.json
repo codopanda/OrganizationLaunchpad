@@ -1,5 +1,5 @@
 {
-  "name": "scaifold",
+  "name": "organization-launchpad",
   "private": true,
   "workspaces": ["apps/*"],
   "scripts": {

@@ -1,4 +1,4 @@
--- Scaifold starter schema. Adjust per app; keep RLS on for user-facing tables.
+-- OrganizationLaunchpad starter schema. Adjust per app; keep RLS on for user-facing tables.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,

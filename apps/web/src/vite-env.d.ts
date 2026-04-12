@@ -10,3 +10,20 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare namespace svelteHTML {
+  interface IntrinsicElements {
+    'organization-launchpad-auth-form': {
+      mode?: 'login' | 'signup';
+      'success-path'?: string;
+    };
+    'organization-launchpad-auth-guard': {
+      heading?: string;
+      message?: string;
+    };
+    'organization-launchpad-auth-callback': {
+      'success-path'?: string;
+      'fallback-path'?: string;
+    };
+  }
+}

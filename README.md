@@ -107,6 +107,25 @@ This is intentional. The repo assumes shared identity and shared database record
 
 ---
 
+## Portable Auth Shell
+
+Auth is now split out of the example app into [`shared/auth`](/Users/binam/Documents/projects/OrganizationLaunchpad/shared/auth:1).
+
+- The auth core is framework-agnostic TypeScript
+- The portable UI is exposed as Web Components
+- The example app in `apps/web` consumes the shared shell instead of owning login/signup itself
+
+For an existing app, the intended integration is:
+
+1. Point the app at the shared Supabase project
+2. Initialize the shared auth client
+3. Mount shared `/login`, `/signup`, and `/auth/callback` screens
+4. Wrap protected content with the shared auth guard
+
+See [docs/add-auth-to-existing-app.md](docs/add-auth-to-existing-app.md).
+
+---
+
 ## Documentation
 
 | Guide                                | When to Read          |

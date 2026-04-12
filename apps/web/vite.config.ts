@@ -49,6 +49,10 @@ export default defineConfig({
   ],
   resolve: {
     alias: [
+      {
+        find: '@shared',
+        replacement: fileURLToPath(new URL('../../shared', import.meta.url)),
+      },
       alias(''),
       alias('domain'),
       alias('application'),
