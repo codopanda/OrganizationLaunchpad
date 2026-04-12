@@ -1,5 +1,9 @@
 # PostHog Setup
 
+> **Coming in V3** — This service is documented but not yet wired in the MVP.
+
+---
+
 [PostHog](https://posthog.com) provides error tracking, performance monitoring, and product analytics in a single platform.
 
 ## Step 1: Create a PostHog Account

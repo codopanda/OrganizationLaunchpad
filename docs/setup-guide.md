@@ -1,49 +1,17 @@
 # OrganizationLaunchpad Setup Guide
 
-This guide walks you through setting up OrganizationLaunchpad from scratch - all manual configurations needed across every service.
+This guide walks you through setting up the MVP: GitHub → Cloudflare Pages with Supabase Auth.
 
 ---
 
-## Roadmap Phases
+## Prerequisites
 
-This scaffold is built in phases. Start with MVP, add more as needed.
+You'll need accounts for:
 
-### MVP — GitHub to Cloudflare Pages
-
-- Supabase (auth only)
-- GitHub Actions CI/CD
-- Cloudflare Pages deployment
-
-### V1 — Lovable Export
-
-- Same as MVP + import from Lovable projects
-
-### V2 — Better Login
-
-- Add Google OAuth via Supabase
-- User profiles with avatar upload
-- Full RLS security
-
-### V3 — Additional Features
-
-- **PostHog** — Analytics + error tracking
-- **Stripe** — Payments + subscriptions
-- **Resend** — Transactional email
-
----
-
-## Overview
-
-Setting up OrganizationLaunchpad requires configuring these services:
-
-| Service        | What You Need to Do                                       |
-| -------------- | --------------------------------------------------------- |
-| **Supabase**   | Create project, configure auth, run migrations            |
-| **GitHub**     | Add secrets for CI/CD                                     |
-| **Cloudflare** | Create Pages project, configure DNS                       |
-| **Resend**     | Create API key, configure SMTP in Supabase                |
-| **Stripe**     | Create API keys (optional, for payments)                  |
-| **PostHog**    | Create project (optional, for error tracking + analytics) |
+- **GitHub** — for CI/CD
+- **Cloudflare** — for Pages deployment
+- **Supabase** — for auth + database
+- **Google Cloud** — for Google OAuth (optional but recommended)
 
 ---
 
@@ -52,21 +20,21 @@ Setting up OrganizationLaunchpad requires configuring these services:
 ### 1.1 Create a Supabase Project
 
 1. Go to [supabase.com](https://supabase.com) → **New Project**
-2. Name: `your-app`
-3. Database Password: Generate a strong password and store it securely
+2. Name: `organization-launchpad`
+3. Database Password: Generate a strong password and save it somewhere
 4. Region: Choose closest to your users
 5. Click **Create new project**
 
 ### 1.2 Get API Keys
 
 1. Go to **Project Settings** → **API**
-2. Copy these values:
+2. Copy these values into `.env.local`:
 
-| Variable                        | Where to Find               |
-| ------------------------------- | --------------------------- |
-| `VITE_PUBLIC_SUPABASE_URL`      | **Project URL** field       |
-| `VITE_PUBLIC_SUPABASE_ANON_KEY` | **anon public** key         |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **service_role** secret key |
+| Variable                        | Value                                             |
+| ------------------------------- | ------------------------------------------------- |
+| `VITE_PUBLIC_SUPABASE_URL`      | **Project URL** (e.g., `https://xxx.supabase.co`) |
+| `VITE_PUBLIC_SUPABASE_ANON_KEY` | **anon public** key                               |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **service_role** secret key (keep this secret!)   |
 
 ### 1.3 Configure Authentication
 
@@ -78,314 +46,159 @@ Setting up OrganizationLaunchpad requires configuring these services:
 ### 1.4 Configure Site URL
 
 1. Go to **Authentication** → **URL Configuration**
-2. Set:
-   - **Site URL**: `https://yourdomain.com` (or `http://localhost:5173` for local)
-   - **Redirect URLs**:
-     ```
-     https://yourdomain.com
-     https://yourdomain.com/auth/callback
-     http://localhost:5173
-     http://localhost:5173/auth/callback
-     ```
+2. Set **Site URL**: `http://localhost:5173` (for local dev)
+3. Set **Redirect URLs**: Add your production domain later
 
-### 1.5 Configure Resend SMTP (Auth Emails)
+### 1.5 Run Database Migrations
 
-1. Go to **Authentication** → **Providers** → **Email**
-2. Scroll to **Custom SMTP**
-3. Enable Custom SMTP and enter:
-   | Field | Value |
-   |-------|-------|
-   | **SMTP Host** | `smtp.resend.com` |
-   | **SMTP Port** | `587` |
-   | **SMTP User** | `resend` |
-   | **SMTP Password** | Your Resend API key |
-   | **Sender Name** | Your app name |
-   | **Sender Email** | `noreply@yourdomain.com` |
-4. Click **Save**
+1. Install Supabase CLI: `npm install -g supabase`
+2. Login: `supabase login`
+3. Link your project: `supabase link --project-ref <your-project-ref>`
+4. Push migrations: `supabase db push`
 
-### 1.6 Configure Google OAuth (Optional)
+Or run the SQL in `supabase/migrations/` manually via the Supabase Dashboard → **SQL Editor**.
+
+---
+
+## Step 2: Google OAuth (Recommended)
+
+### 2.1 Create a Google Cloud Project
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project or select existing
-3. **APIs & Services** → **Library** → Search and enable **Google+ API**
-4. **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth client ID**
-5. Application type: **Web application**
-6. Authorized redirect URIs: `https://your-project-ref.supabase.co/auth/v1/callback`
-7. Copy **Client ID** and **Client Secret**
+2. Create a new project (or use existing)
+3. Go to **APIs & Services** → **OAuth consent screen**
+4. Select **External** → **Create**
+5. App name: `OrganizationLaunchpad`
+6. Add scopes: `email`, `profile`, `openid`
+7. Add test users (for development)
+8. Click **Save and Continue**
 
-Back in Supabase:
+### 2.2 Create OAuth Credentials
 
-1. **Authentication** → **Providers** → **Google**
-2. Enable Google
-3. Paste **Client ID** and **Client Secret**
+1. Go to **APIs & Services** → **Credentials**
+2. Click **Create Credentials** → **OAuth client ID**
+3. Application type: **Web application**
+4. Name: `OrganizationLaunchpad Web`
+5. **Authorized redirect URIs**: Add `https://<your-supabase-project>.supabase.co/auth/v1/callback`
+6. Click **Create**
+7. Copy the **Client ID** and **Client Secret**
+
+### 2.3 Enable in Supabase
+
+1. Go to Supabase → **Authentication** → **Providers** → **Google**
+2. Enable **Enable Sign in with Google**
+3. Paste your **Client ID** and **Client Secret**
 4. Click **Save**
 
-### 1.7 Run Database Migrations
+---
+
+## Step 3: GitHub
+
+### 3.1 Push to GitHub
 
 ```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Login to Supabase
-supabase login
-
-# Link to your project
-supabase link --project-ref your-project-ref
-
-# Push migrations
-supabase db push
+# Create a new repo on GitHub, then:
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/your-org/organization-launchpad.git
+git push -u origin main
 ```
 
-The migrations create:
+### 3.2 Add GitHub Secrets
 
-- `profiles` table (linked to auth.users)
-- `feedback` table
-- RLS policies for user data isolation
-- `avatars` storage bucket
+Go to **GitHub repo** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
 
----
-
-## Step 2: Resend
-
-### 2.1 Create a Resend Account
-
-1. Go to [resend.com](https://resend.com)
-2. Sign up with GitHub
-3. Complete onboarding
-
-### 2.2 Add Your Domain (Production)
-
-1. **Domains** → **Add Domain**
-2. Enter `yourdomain.com`
-3. Add the DNS records Resend provides:
-
-| Type | Name                | Value                               |
-| ---- | ------------------- | ----------------------------------- |
-| TXT  | @                   | `v=spf1 include:spf.resend.io ~all` |
-| TXT  | `resend._domainkey` | (from Resend dashboard)             |
-
-4. Click **Verify**
-
-### 2.3 Get API Key
-
-1. **API Keys** → **Create API Key**
-2. Name: `production`
-3. Permissions: **Full Access**
-4. Click **Create** and copy the key immediately
-
-Format: `re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-### 2.4 Already Done: Configure in Supabase
-
-You already configured Resend in Supabase Dashboard (Step 1.5 above).
+| Secret Name                 | Value                              |
+| --------------------------- | ---------------------------------- |
+| `SUPABASE_URL`              | Same as `VITE_PUBLIC_SUPABASE_URL` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your service role key              |
+| `CLOUDFLARE_API_TOKEN`      | Cloudflare API token (see Step 4)  |
+| `CLOUDFLARE_ACCOUNT_ID`     | Cloudflare account ID              |
 
 ---
 
-## Step 3: Cloudflare
+## Step 4: Cloudflare
 
-### 3.1 Create Pages Project
+### 4.1 Create Cloudflare API Token
 
-1. Go to [dash.cloudflare.com](https://dash.cloudflare.com)
-2. **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
-3. Connect your GitHub repo
-4. Configure:
-   - **Project name**: `web`
-   - **Production branch**: `main`
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **My Profile** → **API Tokens**
+2. Click **Create Token** → **Create Custom Token**
+3. Name: `OrganizationLaunchpad`
+4. Account permissions: `Cloudflare Pages: Edit`
+5. Zone permissions: `Zone: Read`, `DNS: Edit` (if using Terraform)
+6. Click **Create**
+7. Copy the token and add it to GitHub Secrets as `CLOUDFLARE_API_TOKEN`
+
+### 4.2 Get Cloudflare Account ID
+
+1. Go to **Cloudflare Dashboard** → any domain → you'll see **Account ID** in the right sidebar
+2. Copy it and add to GitHub Secrets as `CLOUDFLARE_ACCOUNT_ID`
+
+### 4.3 Connect to Cloudflare Pages
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+2. Authorize GitHub access
+3. Select your repo
+4. Configure build:
+   - **Framework preset**: None
    - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-5. Add environment variable: `NODE_VERSION`: `20`
-6. Click **Save and Deploy**
+   - **Build output directory**: `apps/web/dist`
+5. Click **Deploy**
 
-### 3.2 Get Credentials
+### 4.4 Configure Environment Variables
 
-From the Cloudflare dashboard:
+In Cloudflare Pages settings → **Environment variables**, add:
 
-| Credential              | Where to Find                              |
-| ----------------------- | ------------------------------------------ |
-| `CLOUDFLARE_ACCOUNT_ID` | Workers & Pages → Overview → Account ID    |
-| `CLOUDFLARE_API_TOKEN`  | Profile → API Tokens → Create Custom Token |
+| Variable                        | Value             |
+| ------------------------------- | ----------------- |
+| `VITE_PUBLIC_SUPABASE_URL`      | Your Supabase URL |
+| `VITE_PUBLIC_SUPABASE_ANON_KEY` | Your anon key     |
 
-**Create API Token**:
+### 4.5 Update Supabase Redirect URLs
 
-1. **Profile** → **API Tokens** → **Create Token**
-2. Use **Create Custom Token**
-3. Permissions:
-   - Account: Workers:Edit
-   - Zone: DNS:Edit
-   - Zone: Zone:Read
-4. Click **Create Token**
-
-### 3.3 Configure DNS with Terraform
-
-```bash
-cd infra/terraform
-cp terraform.tfvars.example terraform.tfvars
-```
-
-Edit `terraform.tfvars`:
-
-```hcl
-cloudflare_api_token = "your-cloudflare-api-token"
-cloudflare_zone_id   = "your-zone-id"
-
-subdomain_targets = {
-  web = {
-    type    = "CNAME"
-    content = "your-app.pages.dev"
-    proxied = true
-  }
-}
-```
-
-Apply:
-
-```bash
-terraform init
-terraform apply
-```
+1. Go to Supabase → **Authentication** → **URL Configuration**
+2. Add your Cloudflare Pages URL to **Redirect URLs**
 
 ---
 
-## Step 4: GitHub Secrets and Variables
+## Step 5: Verify Deployment
 
-Go to your GitHub repo → **Settings** → **Secrets and Variables** → **Actions**
-
-### Secrets (Private)
-
-| Secret                  | Value                                            |
-| ----------------------- | ------------------------------------------------ |
-| `CLOUDFLARE_API_TOKEN`  | From Cloudflare (Step 3.2)                       |
-| `CLOUDFLARE_ACCOUNT_ID` | From Cloudflare (Step 3.2)                       |
-| `SUPABASE_ACCESS_TOKEN` | From supabase.com → Account → Access Tokens      |
-| `SUPABASE_ANON_KEY`     | `VITE_PUBLIC_SUPABASE_ANON_KEY` (safe to expose) |
-| `SUPABASE_DB_URL`       | From Supabase → Settings → Connection String     |
-| `STRIPE_SECRET_KEY`     | From Stripe (optional, for payments)             |
-
-### Variables (Public)
-
-| Variable                        | Value                                |
-| ------------------------------- | ------------------------------------ |
-| `VITE_PUBLIC_SUPABASE_URL`      | `https://your-ref.supabase.co`       |
-| `SUPABASE_PROJECT_REF`          | Your project ref (e.g., `abc123def`) |
-| `CLOUDFLARE_PAGES_PROJECT_NAME` | `web` (or your Pages project name)   |
-
----
-
-## Step 5: Local Development
-
-### 5.1 Clone and Install
-
-```bash
-git clone https://github.com/your-org/organization-launchpad.git
-cd organization-launchpad
-npm install
-```
-
-### 5.2 Create Environment File
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-
-```bash
-VITE_PUBLIC_SUPABASE_URL=https://your-ref.supabase.co
-VITE_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-### 5.3 Run Locally
-
-```bash
-npm run dev:web
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
----
-
-## Step 6: Stripe (Optional)
-
-If you need payments:
-
-1. Go to [dashboard.stripe.com](https://dashboard.stripe.com)
-2. Get **Publishable key** (→ `VITE_PUBLIC_STRIPE_KEY`)
-3. Get **Secret key** (→ `STRIPE_SECRET_KEY`)
-4. Configure webhooks in Supabase Edge Functions
-
----
-
-## Step 7: PostHog (Optional)
-
-1. Go to [posthog.com](https://posthog.com) → Create account
-2. Create a new project (choose **Web** platform)
-3. Copy your **API key** from Settings → Projects
-4. Add to `apps/web/src/app.html`:
-
-```html
-<script>
-  posthog.init('your-api-key', { api_host: 'https://app.posthog.com' });
-</script>
-```
-
-Or use the PostHog SDK - see `docs/api-keys/posthog.md`
-
----
-
-## Quick Reference: All Environment Variables
-
-### Frontend (`apps/web/.env.local`)
-
-| Variable                        | Example Value                |
-| ------------------------------- | ---------------------------- |
-| `VITE_PUBLIC_SUPABASE_URL`      | `https://abc123.supabase.co` |
-| `VITE_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...`                     |
-
-### Supabase Edge Function Secrets (via `supabase secrets set`)
-
-| Secret              | Purpose         |
-| ------------------- | --------------- |
-| `STRIPE_SECRET_KEY` | Stripe payments |
-
-### Not Set via CLI (Manual Configuration)
-
-| Secret           | Where to Configure                                        |
-| ---------------- | --------------------------------------------------------- |
-| `RESEND_API_KEY` | Supabase Dashboard → Authentication → Email → Custom SMTP |
+1. Push a commit to GitHub
+2. Watch **GitHub Actions** for the build/deploy pipeline
+3. Once complete, visit your Cloudflare Pages URL
+4. Try signing up with email and Google OAuth
 
 ---
 
 ## Troubleshooting
 
-### "Redirect URL mismatch" on login
+### Auth not working in production
 
-Add your exact URL to **Supabase → Authentication → URL Configuration → Redirect URLs**
+- Check **Redirect URLs** in Supabase include your production URL
+- Ensure `VITE_PUBLIC_SUPABASE_URL` and `VITE_PUBLIC_SUPABASE_ANON_KEY` are set in Cloudflare Pages environment variables
 
-### "JWT verification failed"
+### Build failing
 
-Ensure `VITE_PUBLIC_SUPABASE_ANON_KEY` matches your Supabase project exactly
+- Check GitHub Actions logs for specific errors
+- Ensure `npm run build` works locally
+- Verify Node.js version matches (20+)
 
-### Emails not sending
+### Database migrations not running
 
-1. Verify Resend domain is **Verified** in Resend dashboard
-2. Check **Supabase → Authentication → Providers → Email → Custom SMTP** is enabled
-
-### Cloudflare Pages build failing
-
-1. Verify `NODE_VERSION` environment variable is set to `20` in Pages settings
-2. Check build command is `npm run build` and output directory is `dist`
-
-### Terraform DNS not working
-
-1. Verify `CLOUDFLARE_ZONE_ID` is for the correct domain
-2. Ensure API token has **DNS:Edit** permission
+- Run `supabase db push` locally to apply migrations
+- Or run SQL files manually in Supabase SQL Editor
 
 ---
 
 ## Next Steps
 
-After setup completes:
+Once MVP is working, the scaffold supports:
 
-1. **Read the Architecture** → `docs/architecture.md`
-2. **Customize the Kitchen App** → `apps/web/src/ui/kitchen/`
-3. **Deploy to Production** → `docs/deployment.md`
+- PostHog (analytics + error tracking)
+- Stripe (payments)
+- Resend (transactional email)
+- Tauri (desktop app packaging)
+
+See [AGENTS.md](AGENTS.md) for AI agent instructions on extending the scaffold.

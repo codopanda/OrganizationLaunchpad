@@ -1,5 +1,9 @@
 # Resend Email Setup
 
+> **Coming in V3** — This service is documented but not yet wired in the MVP.
+
+---
+
 ## Overview
 
 Resend is a modern email API designed for developers, perfect for sending transactional emails like welcome emails, password resets, and notifications.

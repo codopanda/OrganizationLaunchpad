@@ -1,5 +1,9 @@
 # Stripe
 
+> **Coming in V3** — This service is documented but not yet wired in the MVP.
+
+---
+
 Purpose: Payment processing, subscriptions, billing management, and invoicing.
 
 Console URL: https://dashboard.stripe.com
@@ -49,11 +53,13 @@ Webhooks are required to handle asynchronous events like subscription updates, p
 ### Option 1: Supabase Edge Functions
 
 1. Create an Edge Function:
+
    ```bash
    supabase functions new stripe-webhook
    ```
 
 2. Set the webhook secret as a secret:
+
    ```bash
    supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
    ```
@@ -63,6 +69,7 @@ Webhooks are required to handle asynchronous events like subscription updates, p
 ### Option 2: Cloudflare Workers
 
 1. Add to your Worker:
+
    ```bash
    wrangler secret put STRIPE_WEBHOOK_SECRET
    ```
@@ -92,11 +99,7 @@ export async function handleWebhook(req: Request): Promise<Response> {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
     console.error('Webhook signature verification failed:', err);
     return new Response('Invalid signature', { status: 400 });
@@ -160,6 +163,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 ### Registering the Webhook Endpoint
 
 In Stripe Dashboard:
+
 1. Go to **Developers** > **Webhooks**.
 2. Click **Add endpoint**.
 3. Enter your webhook URL (e.g., `https://api.yourapp.com/webhook` or your Supabase Edge Function URL).
@@ -180,6 +184,7 @@ The webhook secret (`whsec_xxx`) is used to verify that requests actually come f
 
 1. After registering your webhook endpoint, Stripe will display the **Signing secret** (or webhook secret).
 2. Set it as an environment variable:
+
    ```bash
    # Supabase Edge Functions
    supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
@@ -187,28 +192,29 @@ The webhook secret (`whsec_xxx`) is used to verify that requests actually come f
    # Cloudflare Workers
    wrangler secret put STRIPE_WEBHOOK_SECRET
    ```
+
 3. Never commit this value to version control.
 
 ---
 
 ## Test Mode vs Live Mode
 
-| Aspect | Test Mode | Live Mode |
-|--------|-----------|-----------|
-| API Keys | `sk_test_...`, `pk_test_...` | `sk_live_...`, `pk_live_...` |
-| Data | Isolated sandbox | Real money |
-| Card Numbers | Use Stripe test cards | Use real cards |
-| Webhooks | Same endpoint, different mode | Same endpoint, different mode |
-| Dashboard | Toggle via environment switcher | Toggle via environment switcher |
+| Aspect       | Test Mode                       | Live Mode                       |
+| ------------ | ------------------------------- | ------------------------------- |
+| API Keys     | `sk_test_...`, `pk_test_...`    | `sk_live_...`, `pk_live_...`    |
+| Data         | Isolated sandbox                | Real money                      |
+| Card Numbers | Use Stripe test cards           | Use real cards                  |
+| Webhooks     | Same endpoint, different mode   | Same endpoint, different mode   |
+| Dashboard    | Toggle via environment switcher | Toggle via environment switcher |
 
 ### Stripe Test Card Numbers
 
-| Card Number | Scenario |
-|-------------|----------|
-| `4242424242424242` | Successful payment |
-| `4000000000000002` | Declined card |
+| Card Number        | Scenario                |
+| ------------------ | ----------------------- |
+| `4242424242424242` | Successful payment      |
+| `4000000000000002` | Declined card           |
 | `4000002500003155` | Requires authentication |
-| `4000000000009995` | Insufficient funds |
+| `4000000000009995` | Insufficient funds      |
 
 Use any future expiry date, any 3-digit CVC, and any postal code.
 
@@ -216,12 +222,12 @@ Use any future expiry date, any 3-digit CVC, and any postal code.
 
 ## Environment Variables
 
-| Variable | Where | Purpose |
-|----------|-------|---------|
-| `STRIPE_SECRET_KEY` | Worker/Edge Function (server-side only) | API authentication for Stripe operations |
-| `STRIPE_WEBHOOK_SECRET` | Worker/Edge Function | Verifies webhook authenticity |
-| `STRIPE_CUSTOMER_PORTAL_URL` | Frontend/Worker | URL to Stripe-hosted customer portal |
-| `VITE_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Frontend only | Safe for browser - used with Stripe.js |
+| Variable                             | Where                                   | Purpose                                  |
+| ------------------------------------ | --------------------------------------- | ---------------------------------------- |
+| `STRIPE_SECRET_KEY`                  | Worker/Edge Function (server-side only) | API authentication for Stripe operations |
+| `STRIPE_WEBHOOK_SECRET`              | Worker/Edge Function                    | Verifies webhook authenticity            |
+| `STRIPE_CUSTOMER_PORTAL_URL`         | Frontend/Worker                         | URL to Stripe-hosted customer portal     |
+| `VITE_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Frontend only                           | Safe for browser - used with Stripe.js   |
 
 **Critical**: `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` must never be exposed to frontend code.
 
@@ -234,11 +240,13 @@ Stripe CLI lets you forward webhooks to your local environment for testing.
 1. Install Stripe CLI: https://stripe.com/docs/stripe-cli
 
 2. Login:
+
    ```bash
    stripe login
    ```
 
 3. Forward events to your local endpoint:
+
    ```bash
    stripe listen --forward-to localhost:54321/functions/v1/stripe-webhook
    ```
@@ -246,6 +254,7 @@ Stripe CLI lets you forward webhooks to your local environment for testing.
 4. The CLI will output a webhook signing secret (starts with `whsec_`). Use this locally or set it as `STRIPE_WEBHOOK_SECRET` in your Edge Function secrets.
 
 5. Trigger test events:
+
    ```bash
    stripe trigger customer.subscription.created
    stripe trigger invoice.payment_succeeded
@@ -266,9 +275,11 @@ Stripe CLI lets you forward webhooks to your local environment for testing.
    - Use `VITE_PUBLIC_STRIPE_PUBLISHABLE_KEY` for frontend Stripe.js.
 
 2. **Always verify webhook signatures**
+
    ```typescript
    const event = stripe.webhooks.constructEvent(body, signature, secret);
    ```
+
    Skip this and you open yourself to spoofed events.
 
 3. **Use least-privilege API keys**
@@ -279,6 +290,7 @@ Stripe CLI lets you forward webhooks to your local environment for testing.
 
 5. **Idempotency**
    Use idempotency keys when creating charges or subscriptions to prevent duplicate operations:
+
    ```typescript
    stripe.subscriptions.create(
      { customer: 'cus_xxx', items: [{ price: 'price_xxx' }] },
