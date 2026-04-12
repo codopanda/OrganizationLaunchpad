@@ -4,6 +4,8 @@ This repo now exposes a shared auth shell in `shared/auth` so login does not nee
 
 Read [setup-guide.md](./setup-guide.md) first to verify the reference app works before attaching auth to your own app.
 
+If you are creating a brand-new app rather than adapting an existing one, start from `templates/vanilla-auth-app` instead.
+
 ## What You Reuse
 
 - `shared/auth/client.ts` for Supabase auth client and session state

@@ -26,13 +26,25 @@ npm run dev:web
 
 Open [http://localhost:5173](http://localhost:5173)
 
+## Creating A New App
+
+If you are starting a new app rather than testing `apps/web`, use:
+
+```bash
+npm run new:app -- my-new-app
+npm install
+npm run dev -w my-new-app
+```
+
+This uses `templates/vanilla-auth-app`, which mounts the shared auth shell with plain TypeScript and Web Components.
+
 ---
 
 ## Project Structure
 
 ```
 organization-launchpad/
-├── apps/web/                    # Svelte frontend
+├── apps/web/                    # Svelte reference frontend
 │   ├── src/
 │   │   ├── domain/             # Business logic (framework-free)
 │   │   ├── application/        # Use cases and ports
@@ -79,4 +91,4 @@ VITE_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 
 1. **Setup Guide** → `docs/setup-guide.md` (if not already done)
 2. **Architecture** → `docs/architecture.md`
-3. **Kitchen App** → `apps/web/src/ui/kitchen/` - explore the demo modules
+3. **New App Starter** → `templates/vanilla-auth-app/`

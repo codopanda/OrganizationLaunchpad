@@ -3,6 +3,7 @@
   "private": true,
   "workspaces": ["apps/*"],
   "scripts": {
+    "new:app": "./scripts/new-app.sh",
     "dev:web": "npm run dev -w web",
     "build:web": "npm run build -w web",
     "tauri:dev": "npm run tauri:dev -w web",

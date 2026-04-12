@@ -32,6 +32,7 @@ Ask the user:
 > "Which best describes what you want?"
 
 - **Test the reference app first** — verify the repo works before attaching your own app
+- **Create a new app with shared auth** — start from the framework-neutral starter
 - **Attach auth to my existing app** — you have a frontend already and want to add auth with minimal changes
 
 ---
@@ -194,21 +195,57 @@ Add your Cloudflare Pages URL to **Authentication → URL Configuration → Redi
 
 ---
 
-## Path B: Attach Auth to Your Existing App
+## Path B: Create A New App With Shared Auth
 
 ### 3B.1 — Complete Supabase Setup
 
 Follow [Path A.1](#3a1--run-supabase-setup) above.
 
-### 3B.2 — Read the Integration Guide
+### 3B.2 — Create The New App
 
-Open `docs/add-auth-to-existing-app.md` and follow the steps to mount the shared auth shell in your app.
+```bash
+npm run new:app -- my-new-app
+npm install
+npm run dev -w my-new-app
+```
+
+This starter comes from `templates/vanilla-auth-app` and uses:
+
+- plain TypeScript
+- shared auth Web Components
+- `/login`, `/signup`, `/auth/callback`, and a protected `/app` route
 
 ### 3B.3 — Verify Locally
 
+Visit:
+
+- `/`
+- `/login`
+- `/signup`
+- `/auth/callback`
+- `/app`
+
+### 3B.4 — Customize The Protected App
+
+Keep your public pages as-is and replace the placeholder `/app` content with your real authenticated experience.
+
+---
+
+## Path C: Attach Auth to Your Existing App
+
+### 3C.1 — Complete Supabase Setup
+
+Follow [Path A.1](#3a1--run-supabase-setup) above.
+
+### 3C.2 — Read the Integration Guide
+
+Open `docs/add-auth-to-existing-app.md` and follow the steps to mount the shared auth shell in your app.
+
+### 3C.3 — Verify Locally
+
 Test `/login`, `/signup`, and `/auth/callback` in your app before deploying.
 
-### 3B.4 — Deploy
+### 3C.4 — Deploy
 
 Follow [Path A.4](#3a4--push-to-github) and [Path A.5](#3a5--cloudflare-setup) above.
 
