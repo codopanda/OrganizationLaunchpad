@@ -1,142 +1,143 @@
 # OrganizationLaunchpad
 
-[![CI](https://github.com/anomalyco/organization-launchpad/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/organization-launchpad/actions/workflows/ci.yml)
+Turn AI-generated "vibecoded" apps into production-ready SaaS. Drop your frontend in, get auth, analytics, and deployment pre-wired.
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![Svelte](https://img.shields.io/badge/Svelte-5.53-FF3E00.svg)](https://svelte.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Production-ready scaffold for AI-generated apps. Svelte frontend, Supabase backend, all the business APIs pre-wired.
+---
+
+## The Problem
+
+AI-generated apps work locally but fail in production. They skip auth, analytics, CI/CD, and proper infrastructure. OrganizationLaunchpad is the production shell that fills the gap.
+
+## How It Works
+
+1. **Clone** this repo — you get a monorepo with all APIs pre-wired
+2. **Drop** your frontend (Svelte, React, Vue, htmx — any framework) into `apps/`
+3. **Configure** your Supabase project and Cloudflare deployment
+4. **Ship** — GitHub Actions handles CI/CD to Cloudflare Pages
+
+The scaffold handles the boring stuff so you can focus on your app.
 
 ---
 
 ## Get Started
 
 ```bash
-# Clone the repo
+# Clone the template
 git clone https://github.com/anomalyco/organization-launchpad && cd organization-launchpad
 
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Copy environment template
 cp .env.example .env.local
-# Edit .env.local with your Supabase URL and anon key
+
+# Edit .env.local with your:
+# - Supabase URL + anon key
+# - Cloudflare account details
+# - PostHog API key (optional)
 
 # Start development
 npm run dev:web
 ```
 
-**That's it.** Open [http://localhost:5173](http://localhost:5173)
-
-For full setup including auth, payments, and deployment → [Setup Guide](docs/setup-guide.md)
+See [docs/setup-guide.md](docs/setup-guide.md) for detailed setup.
 
 ---
 
-## Why OrganizationLaunchpad?
-
-| Before (Vibecoded)                 | After (OrganizationLaunchpad) |
-| ---------------------------------- | ----------------------------- |
-| Works locally, fails in production | Deploys with confidence       |
-| Ad-hoc infrastructure              | Terraform + CI/CD             |
-| Auth as afterthought               | Supabase Auth + RLS           |
-| No analytics                       | PostHog pre-wired             |
-| Manual dashboard setup             | Everything in code            |
-
----
-
-## Features
-
-- **Svelte 5** + Vite frontend with TypeScript strict mode
-- **Supabase** — Auth, Postgres, RLS, Storage, Edge Functions
-- **Cloudflare Pages** — Static hosting with global CDN
-- **PWA + Offline** — Service worker, works offline
-- **Tauri** — Desktop app packaging (optional)
-- **Hexagonal Architecture** — Business logic stays framework-free
-- **CI/CD** — GitHub Actions for test, build, deploy
-- **Kitchen App Demo** — Full example showcasing all capabilities
-
----
-
-## Quick Reference
-
-### Commands
-
-```bash
-npm run dev:web          # Start frontend (http://localhost:5173)
-npm run build -w web     # Build for production
-npm run test -w web     # Run unit tests
-npm run test:e2e -w web # Run E2E tests
-npm run lint            # Lint code
-npm run tauri:dev       # Desktop development
-npm run tauri:build     # Build desktop app
-```
-
-### Project Structure
+## Architecture
 
 ```
 organization-launchpad/
-├── apps/web/                    # Svelte + Vite frontend
-│   ├── src/
-│   │   ├── domain/             # Business logic (framework-free)
-│   │   ├── application/         # Use cases, ports
-│   │   ├── adapters/           # Supabase, Stripe, etc.
-│   │   └── ui/                # Components, pages, kitchen/
-│   └── src-tauri/              # Tauri desktop shell
+├── apps/
+│   └── web/                    # Your frontend goes here
+│       ├── src/
+│       │   ├── domain/         # Business logic (framework-free)
+│       │   ├── application/    # Use cases, ports
+│       │   ├── adapters/       # Auth, analytics, storage adapters
+│       │   └── ui/             # Your components
+│       └── src-tauri/          # Optional: Tauri desktop packaging
 ├── supabase/
 │   ├── functions/              # Edge Functions
-│   └── migrations/             # Database schema + RLS
-├── infra/terraform/             # DNS infrastructure
-└── docs/                       # Setup guides
+│   └── migrations/             # Auth schema + RLS policies
+├── infra/terraform/            # Cloudflare DNS
+└── docs/                       # Setup guides + AGENTS.md
 ```
+
+**Design principles:**
+
+- Adapters are framework-agnostic — works with any frontend
+- Auth and analytics are configured once, used by all apps
+- Infrastructure as code — no manual dashboard configuration
 
 ---
 
 ## Pre-Wired Services
 
-| Service      | Purpose                                     |
-| ------------ | ------------------------------------------- |
-| Supabase     | Auth, database, RLS, storage                |
-| Google OAuth | Single sign-on                              |
-| Resend       | Transactional email (auth confirmations)    |
-| Stripe       | Payments (optional)                         |
-| PostHog      | Privacy-friendly analytics + error tracking |
+| Service          | Purpose                      |
+| ---------------- | ---------------------------- |
+| Supabase         | Auth, database, RLS, storage |
+| GitHub           | CI/CD (Actions)              |
+| Cloudflare Pages | Deployment + CDN             |
+| PostHog          | Analytics + error tracking   |
+| Google OAuth     | SSO via Supabase             |
+| Resend           | Transactional email          |
+| Stripe           | Payments (V3+)               |
 
-See [docs/setup-guide.md](docs/setup-guide.md) for setup instructions.
+---
+
+## Roadmap
+
+### MVP — GitHub to Cloudflare Pages
+
+One-command deployment from GitHub to Cloudflare Pages. Connect your repo, get a live URL.
+
+**Stack:** GitHub, Cloudflare Pages, Supabase (auth only)
+
+### V1 — Lovable Export
+
+Import your [Lovable](https://lovable.dev) app directly. Instructions for copying code and wiring it up with the scaffold's auth and analytics.
+
+**Stack:** Lovable → OrganizationLaunchpad
+
+### V2 — Better Login
+
+Full user management through Supabase Auth with Google OAuth + email/password. Users can sign up, manage profiles, and access their data securely via RLS.
+
+**Stack:** + Google Cloud OAuth
+
+### V3 — Additional Features
+
+Production-ready features for paid apps:
+
+- **PostHog** — Analytics, session replay, feature flags
+- **Stripe** — Payments, subscriptions, invoices
+- **Resend** — Transactional email, user notifications
 
 ---
 
 ## Documentation
 
-| Guide                                | When to Read                         |
-| ------------------------------------ | ------------------------------------ |
-| [Setup Guide](docs/setup-guide.md)   | First time - complete service setup  |
-| [Architecture](docs/architecture.md) | Understanding the codebase structure |
-| [Deployment](docs/deployment.md)     | Deploying to production              |
-| [API Docs](docs/api-keys/)           | Detailed service integration docs    |
+| Guide                                | When to Read                |
+| ------------------------------------ | --------------------------- |
+| [Setup Guide](docs/setup-guide.md)   | Initial setup               |
+| [AGENTS.md](AGENTS.md)               | AI agent instructions       |
+| [Architecture](docs/architecture.md) | Code structure              |
+| [Deployment](docs/deployment.md)     | Production deployment       |
+| [API Docs](docs/api-keys/)           | Service integration details |
 
 ---
 
-## Kitchen App Demo
+## AI Agent Support
 
-Clone and you get a working app demonstrating:
+This repo is designed for AI agents to understand and maintain. See [AGENTS.md](AGENTS.md) for:
 
-- Email/password + Google OAuth login
-- User profiles with avatar upload
-- Feedback submission
-- Timer with browser notifications
-- In-app notification center
-- Offline PWA support
-
-Each module is isolated — delete what you don't need.
-
----
-
-## Principles
-
-- **Static-first** — Prefer static deployment where possible
-- **Database-centric** — RLS for auth, Supabase for backend
-- **Infrastructure as code** — Terraform, no manual dashboard config
-- **Framework independence** — Domain logic has no framework deps
+- Project structure overview
+- How to add new apps
+- How to wire up services
+- Deployment workflow
 
 ---
 

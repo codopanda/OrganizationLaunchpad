@@ -4,6 +4,34 @@ This guide walks you through setting up OrganizationLaunchpad from scratch - all
 
 ---
 
+## Roadmap Phases
+
+This scaffold is built in phases. Start with MVP, add more as needed.
+
+### MVP — GitHub to Cloudflare Pages
+
+- Supabase (auth only)
+- GitHub Actions CI/CD
+- Cloudflare Pages deployment
+
+### V1 — Lovable Export
+
+- Same as MVP + import from Lovable projects
+
+### V2 — Better Login
+
+- Add Google OAuth via Supabase
+- User profiles with avatar upload
+- Full RLS security
+
+### V3 — Additional Features
+
+- **PostHog** — Analytics + error tracking
+- **Stripe** — Payments + subscriptions
+- **Resend** — Transactional email
+
+---
+
 ## Overview
 
 Setting up OrganizationLaunchpad requires configuring these services:
