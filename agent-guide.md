@@ -2,6 +2,26 @@
 
 Help a non-technical user own and deploy their web app using OrganizationLaunchpad.
 
+## Browser Behavior
+
+When this guide tells you to visit a website:
+
+- if your environment supports Playwright or browser automation, use it
+- open the URL for the user if your agent environment supports browser actions
+- prefer real page navigation, button clicks, and form-field guidance over describing dashboard paths from memory
+- take screenshots when useful so the user can confirm they are on the correct page
+- after each major navigation step, tell the user what page or settings area you reached
+- if you cannot open URLs directly, explicitly ask the user to open the URL themselves
+- do not silently assume the site has been opened
+
+When using browser automation:
+
+- navigate to the relevant site
+- click the actual buttons or links needed to reach the next settings page
+- use screenshots to confirm the current screen before giving instructions
+- if login, MFA, CAPTCHA, or billing blocks automation, stop and ask the user to complete that step
+- resume from the current page once the user is back
+
 ## Step 1 — Check GitHub Setup
 
 Ask the user:
@@ -9,7 +29,9 @@ Ask the user:
 > "Do you already have a GitHub account?"
 
 - **Yes** → confirm they can push to GitHub (ask them to visit `github.com` and log in)
-- **No** → help them create one at `https://github.com/signup`, then come back
+- **No** → open `https://github.com/signup` if possible, otherwise ask them to open it, then come back
+
+If browser automation is available, navigate to `https://github.com/signup`, take a screenshot, and guide the user through the visible signup form.
 
 ## Step 2 — Clone the Repo
 
@@ -43,11 +65,18 @@ Ask the user:
 
 #### Create a Supabase Project
 
-1. Open `https://supabase.com` → **New Project**
+1. Open `https://supabase.com` if possible, otherwise ask the user to open it → **New Project**
 2. Name: `organization-launchpad`
 3. Database Password: Generate and save securely
 4. Region: Choose closest to your users
 5. Click **Create new project** — wait ~60 seconds
+
+If browser automation is available:
+
+- open Supabase
+- click the visible **New Project** button
+- take a screenshot of the project creation form
+- guide the user field-by-field using what is on screen
 
 #### Get API Keys
 
@@ -59,10 +88,14 @@ Ask the user:
    | `VITE_PUBLIC_SUPABASE_ANON_KEY` | anon public key |
    | `SUPABASE_SERVICE_ROLE_KEY` | service_role key (keep secret!) |
 
+If browser automation is available, click into **Project Settings** and **API**, take a screenshot, and point the user to the exact visible labels for the URL and keys.
+
 #### Configure Authentication
 
 1. Go to **Authentication** → **Providers** → **Email**
 2. Enable **Enable Email**, **Confirm email**: ON, **Allow new users to sign up**: ON
+
+If browser automation is available, click into those tabs and take a screenshot before telling the user which toggles to change.
 
 #### Configure Site URL
 
@@ -75,6 +108,8 @@ Ask the user:
    http://localhost:5173/dashboard
    http://localhost:5173/auth/callback
    ```
+
+If browser automation is available, navigate to **URL Configuration**, take a screenshot, and confirm the user is editing the correct redirect settings page.
 
 #### Run Database Migrations
 
@@ -91,7 +126,7 @@ Current migrations: `0001_initial_schema.sql`, `0002_profiles_trigger.sql`, `000
 
 #### Create a Google Cloud Project
 
-1. Open `https://console.cloud.google.com`
+1. Open `https://console.cloud.google.com` if possible, otherwise ask the user to open it
 2. Create a new project (or use existing)
 3. Go to **APIs & Services** → **OAuth consent screen**
 4. Select **External** → **Create**
@@ -99,6 +134,8 @@ Current migrations: `0001_initial_schema.sql`, `0002_profiles_trigger.sql`, `000
 6. Add scopes: `email`, `profile`, `openid`
 7. Add test users (for development)
 8. Click **Save and Continue**
+
+If browser automation is available, use clicks to reach **OAuth consent screen** and take a screenshot before instructing the user what to fill out.
 
 #### Create OAuth Credentials
 
@@ -109,10 +146,14 @@ Current migrations: `0001_initial_schema.sql`, `0002_profiles_trigger.sql`, `000
 5. **Authorized redirect URIs**: `https://<your-supabase-project>.supabase.co/auth/v1/callback`
 6. Click **Create** and copy the **Client ID** and **Client Secret**
 
+If browser automation is available, click through to **Credentials**, take a screenshot of the OAuth client form, and use the visible labels/buttons instead of generic directions.
+
 #### Enable in Supabase
 
 1. Go to Supabase → **Authentication** → **Providers** → **Google**
 2. Enable **Sign in with Google** and paste the Client ID + Secret
+
+If browser automation is available, return to Supabase, click into the Google provider settings, and take a screenshot so the user can confirm the right form is open.
 
 ### 3A.3 — Local Verification
 
@@ -152,12 +193,14 @@ Add these to **GitHub repo Settings → Secrets and variables → Actions**:
 
 #### Create a Cloudflare API Token
 
-1. Open `https://dash.cloudflare.com` → **My Profile** → **API Tokens**
+1. Open `https://dash.cloudflare.com` if possible, otherwise ask the user to open it → **My Profile** → **API Tokens**
 2. Click **Create Token** → **Create Custom Token**
 3. Name: `OrganizationLaunchpad`
 4. Account permissions: `Cloudflare Pages: Edit`
 5. Zone permissions: `Zone: Read`, `DNS: Edit` (if using Terraform)
 6. Click **Create** and copy the token
+
+If browser automation is available, click through Cloudflare until **API Tokens** is visible, take a screenshot, and then guide the user through the token form.
 
 #### Get Cloudflare Account ID
 
@@ -173,6 +216,8 @@ Add these to **GitHub repo Settings → Secrets and variables → Actions**:
    - **Build command**: `npm run build:web`
    - **Build output directory**: `apps/web/dist`
 5. Click **Deploy**
+
+If browser automation is available, use clicks to reach **Workers & Pages**, take a screenshot of the project setup page, and then walk the user through the visible deployment fields.
 
 #### Add Environment Variables in Cloudflare Pages
 
