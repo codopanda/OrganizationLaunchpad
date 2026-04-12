@@ -40,6 +40,48 @@ Canonical migration baseline:
 - `0002_profiles_trigger.sql`
 - `0004_storage_buckets.sql`
 
+## Google OAuth With Supabase
+
+Use this when you want the shared login UI to support “Continue with Google”.
+
+1. Open Google Cloud Console and create or select a project
+2. Go to **APIs & Services** → **OAuth consent screen**
+3. Create an **External** consent screen
+4. Set the app name, support email, and developer contact email
+5. Add scopes for:
+   - `email`
+   - `profile`
+   - `openid`
+6. Add your own Google account as a test user while developing
+7. Go to **APIs & Services** → **Credentials**
+8. Create an **OAuth client ID**
+9. Choose **Web application**
+10. Add this redirect URI:
+
+```text
+https://<your-supabase-project-ref>.supabase.co/auth/v1/callback
+```
+
+11. Copy the Google **Client ID** and **Client Secret**
+12. Open your Supabase project
+13. Go to **Authentication** → **Providers** → **Google**
+14. Enable the Google provider
+15. Paste the Google **Client ID** and **Client Secret**
+16. Save the provider settings
+17. Go to **Authentication** → **URL Configuration**
+18. Make sure your app URLs are listed under **Redirect URLs**, for example:
+
+```text
+http://localhost:5173/auth/callback
+http://localhost:5173/login
+http://localhost:5173/signup
+http://localhost:5173/dashboard
+```
+
+19. Test the flow from your app’s `/login` page
+
+For more detail, see [docs/api-keys/google-oauth.md](./api-keys/google-oauth.md).
+
 ## Path A: Test The Reference App
 
 ```bash

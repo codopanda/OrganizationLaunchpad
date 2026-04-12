@@ -41,3 +41,45 @@ That starter uses plain TypeScript and the shared auth Web Components, so the lo
 
 - [docs/setup-guide.md](docs/setup-guide.md)
 - [docs/add-auth-to-existing-app.md](docs/add-auth-to-existing-app.md)
+
+## Roadmap
+
+### MVP
+
+Get people to be able to create vibecoded apps through GitHub, and have them auto deployed to Cloudflare Pages.
+
+Core stack:
+
+- GitHub
+- Cloudflare Pages
+- Supabase
+
+### V1: Lovable Export
+
+Get people to be able to go from their Lovable app to this repo.
+
+- instructions on how to copy code from Lovable to local
+- bring the app into this repo
+- push to GitHub
+- auto deploy to Cloudflare Pages
+
+### V2: Better Login
+
+Get people to be able to create users for their apps through Supabase login and Cloudflare Pages.
+
+Additional service:
+
+- Google Cloud for Google Auth
+
+Focus:
+
+- Supabase auth setup
+- email/password login
+- Google OAuth
+- shared login/register flow for deployed apps
+
+### V3: Additional Features
+
+- PostHog
+- Stripe
+- Resend

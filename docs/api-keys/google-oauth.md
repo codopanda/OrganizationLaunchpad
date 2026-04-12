@@ -69,6 +69,16 @@ This guide configures Google OAuth authentication through Supabase, allowing use
    - **Client Secret**: Your Google OAuth Client Secret
 6. Click **Save**
 
+### Supabase-side checklist
+
+After enabling the provider, confirm all of the following inside Supabase:
+
+- **Authentication** → **Providers** → **Google** is enabled
+- the Google **Client ID** is pasted correctly
+- the Google **Client Secret** is pasted correctly
+- **Authentication** → **URL Configuration** contains your local and production callback URLs
+- your app sends users back to `/auth/callback`
+
 ## Step 6: Add Redirect URLs in Both Google and Supabase
 
 ### Google Cloud Console Redirect URIs
@@ -99,6 +109,16 @@ http://localhost:3000/auth/callback
 ```
 
 > **Tip**: The redirect URL format for Supabase is typically `<SITE_URL>/auth/callback`. Ensure this matches exactly what you set in Supabase's URL Configuration.
+
+### Recommended local Supabase redirect set for OrganizationLaunchpad
+
+```text
+http://localhost:5173
+http://localhost:5173/login
+http://localhost:5173/signup
+http://localhost:5173/dashboard
+http://localhost:5173/auth/callback
+```
 
 ## Step 7: Test the Integration
 
