@@ -2,6 +2,10 @@
 
 Place application repositories or app source folders here.
 
+## Included scaffold
+
+- **`web`** — Svelte + Vite (`npm run dev -w web`), static `dist/` output, optional Tauri shell in `src-tauri/`.
+
 Guidelines:
 
 - net-new frontend apps should use Svelte

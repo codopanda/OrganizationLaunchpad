@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars (never commit real secrets).
+
+cloudflare_api_token = "paste-token-from-cloudflare"
+cloudflare_zone_id   = "paste-zone-id"
+
+# Folder `apps/web`  -> `web.<your-domain>`
+# Folder `workers/api` -> `api.<your-domain>`
+# Point `content` at the hostname Cloudflare gives you for Pages / Workers custom domains.
+subdomain_targets = {
+  web = {
+    type    = "CNAME"
+    content = "scaifold.pages.dev"
+    proxied = true
+  }
+  api = {
+    type    = "CNAME"
+    content = "api.your-account.workers.dev"
+    proxied = true
+  }
+}

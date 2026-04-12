@@ -1,0 +1,18 @@
+# Minimal Supabase CLI config. Install CLI: https://supabase.com/docs/guides/cli
+# Run `supabase init` in this repo to refresh, or use the hosted SQL editor for one-off changes.
+
+project_id = "scaifold-local"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[functions]
+enabled = true

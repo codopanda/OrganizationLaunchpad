@@ -1,12 +1,12 @@
-# Scaifold Setup Guide
+# OrganizationLaunchpad Setup Guide
 
-This guide walks you through setting up Scaifold from scratch - all manual configurations needed across every service.
+This guide walks you through setting up OrganizationLaunchpad from scratch - all manual configurations needed across every service.
 
 ---
 
 ## Overview
 
-Setting up Scaifold requires configuring these services:
+Setting up OrganizationLaunchpad requires configuring these services:
 
 | Service        | What You Need to Do                                       |
 | -------------- | --------------------------------------------------------- |
@@ -248,8 +248,8 @@ Go to your GitHub repo → **Settings** → **Secrets and Variables** → **Acti
 ### 5.1 Clone and Install
 
 ```bash
-git clone https://github.com/your-org/scaifold.git
-cd scaifold
+git clone https://github.com/your-org/organization-launchpad.git
+cd organization-launchpad
 npm install
 ```
 

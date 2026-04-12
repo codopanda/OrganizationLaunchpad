@@ -12,8 +12,8 @@ This page is a quick reference for running locally after setup is complete.
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/your-org/scaifold.git
-cd scaifold
+git clone https://github.com/your-org/organization-launchpad.git
+cd organization-launchpad
 npm install
 
 # 2. Set up environment variables
@@ -31,7 +31,7 @@ Open [http://localhost:5173](http://localhost:5173)
 ## Project Structure
 
 ```
-scaifold/
+organization-launchpad/
 ├── apps/web/                    # Svelte frontend
 │   ├── src/
 │   │   ├── domain/             # Business logic (framework-free)
@@ -54,13 +54,13 @@ scaifold/
 
 ## Common Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev:web` | Start frontend dev server |
-| `npm run build -w web` | Build for production |
-| `npm run test -w web` | Run unit tests |
-| `npm run test:e2e -w web` | Run E2E tests |
-| `npm run lint` | Run ESLint |
+| Command                   | Description               |
+| ------------------------- | ------------------------- |
+| `npm run dev:web`         | Start frontend dev server |
+| `npm run build -w web`    | Build for production      |
+| `npm run test -w web`     | Run unit tests            |
+| `npm run test:e2e -w web` | Run E2E tests             |
+| `npm run lint`            | Run ESLint                |
 
 ---
 

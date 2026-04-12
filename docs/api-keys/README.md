@@ -1,6 +1,6 @@
 # API keys and credentials
 
-Use this directory to document every external service an app depends on. Below is the full set used by the Scaifold scaffold itself.
+Use this directory to document every external service an app depends on. Below is the full set used by the OrganizationLaunchpad scaffold itself.
 
 | Service    | Purpose                                            | Doc                              |
 | ---------- | -------------------------------------------------- | -------------------------------- |

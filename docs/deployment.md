@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide walks you through deploying the Scaifold scaffold to production. Follow each section in order.
+This guide walks you through deploying the OrganizationLaunchpad scaffold to production. Follow each section in order.
 
 ---
 
@@ -8,11 +8,11 @@ This guide walks you through deploying the Scaifold scaffold to production. Foll
 
 ### Required Accounts
 
-| Service | Sign Up | Purpose |
-|---------|---------|---------|
-| Cloudflare | [dash.cloudflare.com](https://dash.cloudflare.com) | Pages (hosting), DNS |
-| Supabase | [supabase.com/dashboard](https://supabase.com/dashboard) | Auth, Database, Edge Functions |
-| GitHub | [github.com](https://github.com) | CI/CD, Repository |
+| Service    | Sign Up                                                  | Purpose                        |
+| ---------- | -------------------------------------------------------- | ------------------------------ |
+| Cloudflare | [dash.cloudflare.com](https://dash.cloudflare.com)       | Pages (hosting), DNS           |
+| Supabase   | [supabase.com/dashboard](https://supabase.com/dashboard) | Auth, Database, Edge Functions |
+| GitHub     | [github.com](https://github.com)                         | CI/CD, Repository              |
 
 ### Required Tools
 
@@ -34,8 +34,8 @@ git --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/scaifold.git
-cd scaifold
+git clone https://github.com/your-org/organization-launchpad.git
+cd organization-launchpad
 
 # Install dependencies
 npm install
@@ -65,6 +65,7 @@ Before deploying, gather these credentials (see `docs/api-keys/` for detailed se
    - **Build output directory**: `dist`
 
 4. Add environment variables in Pages settings:
+
    ```
    NODE_VERSION: 20
    ```
@@ -89,11 +90,11 @@ npx wrangler pages deploy apps/web/dist --project-name=web
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Build fails | Check Node version matches `20` in Pages settings |
-| 404 on assets | Verify build output directory is `dist` |
-| Missing env vars | Add `VITE_PUBLIC_*` variables in Pages settings |
+| Issue            | Solution                                          |
+| ---------------- | ------------------------------------------------- |
+| Build fails      | Check Node version matches `20` in Pages settings |
+| 404 on assets    | Verify build output directory is `dist`           |
+| Missing env vars | Add `VITE_PUBLIC_*` variables in Pages settings   |
 
 ---
 
@@ -128,6 +129,7 @@ supabase secrets set STRIPE_SECRET_KEY=sk_live_your-key
 ### Health Check Function
 
 A health check function is included at `supabase/functions/health/`. Access it at:
+
 ```
 https://your-project.supabase.co/functions/v1/health
 ```
@@ -135,6 +137,7 @@ https://your-project.supabase.co/functions/v1/health
 ### Custom Domains for Edge Functions
 
 Edge Functions run on `*.supabase.co` by default. For custom domains, consider:
+
 1. Cloudflare proxy to `your-project.supabase.co`
 2. Or use Cloudflare Workers as a proxy
 
@@ -199,11 +202,11 @@ supabase db check
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Redirect URL mismatch | Add exact URL to Authentication → URL Configuration |
-| JWT verification fails | Ensure anon key matches your Supabase project |
-| Migration fails | Check migration SQL syntax; run in order |
+| Issue                  | Solution                                            |
+| ---------------------- | --------------------------------------------------- |
+| Redirect URL mismatch  | Add exact URL to Authentication → URL Configuration |
+| JWT verification fails | Ensure anon key matches your Supabase project       |
+| Migration fails        | Check migration SQL syntax; run in order            |
 
 ---
 
@@ -273,10 +276,10 @@ terraform output record_ids
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `zone_id` not found | Verify zone is added to Cloudflare dashboard |
-| Token permissions | Ensure API token has DNS:Edit permission |
+| Issue                 | Solution                                       |
+| --------------------- | ---------------------------------------------- |
+| `zone_id` not found   | Verify zone is added to Cloudflare dashboard   |
+| Token permissions     | Ensure API token has DNS:Edit permission       |
 | Record already exists | `terraform apply` will update existing records |
 
 ---
@@ -287,11 +290,11 @@ terraform output record_ids
 
 Set in Cloudflare Pages → Settings → Environment Variables:
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `VITE_PUBLIC_SUPABASE_URL` | `https://your-ref.supabase.co` | From Supabase settings |
-| `VITE_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` | Public anon key |
-| `NODE_VERSION` | `20` | Required for build |
+| Variable                        | Value                          | Notes                  |
+| ------------------------------- | ------------------------------ | ---------------------- |
+| `VITE_PUBLIC_SUPABASE_URL`      | `https://your-ref.supabase.co` | From Supabase settings |
+| `VITE_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...`                       | Public anon key        |
+| `NODE_VERSION`                  | `20`                           | Required for build     |
 
 ### Local Development
 
@@ -309,11 +312,11 @@ VITE_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 The repo includes three workflow files in `.github/workflows/`:
 
-| Workflow | Purpose | Trigger |
-|----------|---------|---------|
-| `ci.yml` | Lint, type check, test, build | Every push/PR |
-| `deploy.yml` | Deploy frontend + edge functions + migrations | Push to main, manual |
-| `terraform.yml` | Apply DNS changes via Terraform | Push to main (infra/ only), manual |
+| Workflow        | Purpose                                       | Trigger                            |
+| --------------- | --------------------------------------------- | ---------------------------------- |
+| `ci.yml`        | Lint, type check, test, build                 | Every push/PR                      |
+| `deploy.yml`    | Deploy frontend + edge functions + migrations | Push to main, manual               |
+| `terraform.yml` | Apply DNS changes via Terraform               | Push to main (infra/ only), manual |
 
 ### Required GitHub Secrets
 
@@ -321,22 +324,22 @@ In GitHub → Settings → Secrets and Variables → Actions:
 
 **Secrets (private):**
 
-| Secret | Value | Used By |
-|--------|-------|---------|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API token | Pages, Terraform |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID | Pages |
-| `SUPABASE_ACCESS_TOKEN` | Supabase personal access token | Edge Functions, Migrations |
-| `SUPABASE_ANON_KEY` | Supabase anon key | Pages env vars (frontend) |
-| `SUPABASE_DB_URL` | Database connection string | Migrations |
-| `RESEND_API_KEY` | Resend API key | **Supabase Auth SMTP** (Dashboard, not CLI) |
-| `STRIPE_SECRET_KEY` | Stripe secret key | **Supabase Edge Function secrets** |
+| Secret                  | Value                          | Used By                                     |
+| ----------------------- | ------------------------------ | ------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token           | Pages, Terraform                            |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID          | Pages                                       |
+| `SUPABASE_ACCESS_TOKEN` | Supabase personal access token | Edge Functions, Migrations                  |
+| `SUPABASE_ANON_KEY`     | Supabase anon key              | Pages env vars (frontend)                   |
+| `SUPABASE_DB_URL`       | Database connection string     | Migrations                                  |
+| `RESEND_API_KEY`        | Resend API key                 | **Supabase Auth SMTP** (Dashboard, not CLI) |
+| `STRIPE_SECRET_KEY`     | Stripe secret key              | **Supabase Edge Function secrets**          |
 
 **Variables (can be public):**
 
-| Variable | Value |
-|----------|-------|
-| `VITE_PUBLIC_SUPABASE_URL` | `https://your-ref.supabase.co` |
-| `SUPABASE_PROJECT_REF` | Your Supabase project ref |
+| Variable                        | Value                                          |
+| ------------------------------- | ---------------------------------------------- |
+| `VITE_PUBLIC_SUPABASE_URL`      | `https://your-ref.supabase.co`                 |
+| `SUPABASE_PROJECT_REF`          | Your Supabase project ref                      |
 | `CLOUDFLARE_PAGES_PROJECT_NAME` | Cloudflare Pages project name (default: `web`) |
 
 ### Get Supabase Access Token
@@ -446,18 +449,18 @@ supabase secrets set SECRET_NAME=value
 
 ### Key URLs
 
-| Service | URL |
-|---------|-----|
-| Cloudflare Dashboard | https://dash.cloudflare.com |
-| Supabase Dashboard | https://supabase.com/dashboard |
-| GitHub Actions | https://github.com/your-org/scaifold/actions |
+| Service              | URL                                                        |
+| -------------------- | ---------------------------------------------------------- |
+| Cloudflare Dashboard | https://dash.cloudflare.com                                |
+| Supabase Dashboard   | https://supabase.com/dashboard                             |
+| GitHub Actions       | https://github.com/your-org/organization-launchpad/actions |
 
 ### File Locations
 
-| Component | Path |
-|-----------|------|
-| Frontend | `apps/web/` |
-| Edge Functions | `supabase/functions/` |
-| Terraform | `infra/terraform/` |
-| Migrations | `supabase/migrations/` |
-| API Keys Docs | `docs/api-keys/` |
+| Component      | Path                   |
+| -------------- | ---------------------- |
+| Frontend       | `apps/web/`            |
+| Edge Functions | `supabase/functions/`  |
+| Terraform      | `infra/terraform/`     |
+| Migrations     | `supabase/migrations/` |
+| API Keys Docs  | `docs/api-keys/`       |

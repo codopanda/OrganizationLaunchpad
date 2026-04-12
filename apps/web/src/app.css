@@ -1,0 +1,96 @@
+:root {
+  --bg: #0c0d12;
+  --surface: #14151c;
+  --border: #2a2c38;
+  --text: #e4e4eb;
+  --muted: #9aa0b4;
+  --accent: #7c3aed;
+  --error: #f87171;
+  --code: #11131a;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background: radial-gradient(1200px 600px at 20% -10%, #1e1b4b33, transparent),
+    var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.lede {
+  color: var(--muted);
+  margin: 0;
+  max-width: 52ch;
+}
+
+.card {
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 18px 40px #00000055;
+}
+
+.card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.muted {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.code {
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: var(--code);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
+.error {
+  color: var(--error);
+  margin: 0.5rem 0 0;
+}
