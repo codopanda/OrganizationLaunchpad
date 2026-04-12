@@ -15,7 +15,7 @@ AI-generated apps work locally but fail in production. They skip auth, CI/CD, an
 
 1. **Clone** this repo — you get a monorepo with auth + deployment pre-wired
 2. **Drop** your frontend (Svelte, React, Vue, htmx — any framework) into `apps/`
-3. **Configure** your Supabase project and Cloudflare deployment
+3. **Configure** your shared Supabase project and Cloudflare deployment
 4. **Ship** — GitHub Actions handles CI/CD to Cloudflare Pages
 
 The scaffold handles the boring stuff so you can focus on your app.
@@ -58,6 +58,7 @@ One-command deployment from GitHub to Cloudflare Pages with full auth out of the
 - Cloudflare Pages deployment
 - Database with Row Level Security (RLS)
 - User profiles with avatar upload
+- Support for multiple apps sharing one Supabase project
 
 **Stack:** GitHub, Cloudflare Pages, Supabase (Auth + Database)
 
@@ -68,7 +69,7 @@ One-command deployment from GitHub to Cloudflare Pages with full auth out of the
 ```
 organization-launchpad/
 ├── apps/
-│   └── web/                    # Your frontend goes here
+│   └── web/                    # Default frontend; add more apps alongside it
 │       ├── src/
 │       │   ├── domain/         # Business logic (framework-free)
 │       │   ├── application/    # Use cases, ports
@@ -85,8 +86,24 @@ organization-launchpad/
 **Design principles:**
 
 - Adapters are framework-agnostic — works with any frontend
-- Auth configured once, used by all apps
+- Multiple apps can use the same Supabase project
+- Each app/domain keeps its own login session
+- Shared user data should be keyed by the same `auth.users.id`
 - Infrastructure as code — no manual dashboard configuration
+
+---
+
+## Multi-App Auth Model
+
+This scaffold is designed for a shared-Supabase, per-app-login setup:
+
+- All apps can point to the same Supabase project
+- Users are the same Supabase users across every app
+- Each app or domain manages its own browser session, so users may need to log in separately on each site
+- Shared data lives in common tables keyed by `auth.users.id`
+- App-specific data should include an `app_id` or similar scope column when needed
+
+This is intentional. The repo assumes shared identity and shared database records where appropriate, not automatic cross-domain session sharing.
 
 ---
 

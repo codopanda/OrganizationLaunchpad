@@ -6,6 +6,8 @@ This document helps AI agents understand and work with OrganizationLaunchpad.
 
 **What it is:** A production shell for AI-generated apps. Users clone this repo, drop in their frontend, and get auth, analytics, and deployment pre-wired.
 
+**Auth model:** Multiple apps can share one Supabase project. User identity is shared through the same `auth.users` records, but browser sessions are app/domain-specific, so each app may require its own login.
+
 **The flow:**
 
 1. User clones the repo
@@ -79,8 +81,18 @@ Supabase Auth handles user management:
 
 1. User signs up → Supabase creates `auth.users` entry
 2. Profile record created in `public.profiles` (linked by `auth.users.id`)
-3. Row Level Security (RLS) enforces: "users only see their own data"
-4. Frontend uses `supabase.auth` client (from adapter) — never vendor SDK directly
+3. Each app authenticates against the same Supabase project, but keeps its own session on its own origin
+4. Row Level Security (RLS) enforces: "users only see their own data"
+5. Frontend uses `supabase.auth` client (from adapter) — never vendor SDK directly
+
+### Multi-App Data Model
+
+When several apps share the same Supabase backend:
+
+- Shared user data should be keyed by `auth.users.id`
+- App-specific data should include an `app_id`, `site_id`, or equivalent scope column
+- Do not assume logging into one domain logs the user into another domain
+- Keep RLS policies explicit about whether data is shared across apps or scoped to a single app
 
 ### Deployment Flow
 
@@ -98,9 +110,11 @@ git push → GitHub Actions →
 ### Add a new app to `apps/`
 
 1. Create `apps/<new-app>/`
-2. Follow the adapter pattern (see above)
-3. Add migration if you need new database tables
-4. Update `.github/workflows/deploy.yml` if needed
+2. Point it at the shared Supabase project unless the app truly needs isolation
+3. Follow the adapter pattern (see above)
+4. Reuse the same auth flow, but assume users may need to sign in separately on that app's domain
+5. Add migration if you need new database tables
+6. Update `.github/workflows/deploy.yml` if needed
 
 ### Wire up a new service
 
@@ -111,9 +125,11 @@ git push → GitHub Actions →
 
 ### Set up authentication for a new app
 
-1. Ensure Supabase client is configured in `src/adapters/supabase/client.ts`
-2. Use `authPort.signIn(email, password)` in your use cases
-3. Protect routes with `authPort.requireAuth()`
+1. Ensure the app points at the shared Supabase URL and anon key
+2. Reuse the existing auth adapter pattern for that app
+3. Use sign-in flows locally within the app; do not assume session sharing across domains
+4. Protect app routes/components according to that app's requirements
+5. If the app needs shared user data, key tables by `auth.users.id`
 
 ### Configure analytics
 
@@ -124,8 +140,9 @@ git push → GitHub Actions →
 ### Add database tables
 
 1. Create migration in `supabase/migrations/<timestamp>_<name>.sql`
-2. Define RLS policies for row-level security
-3. Run `supabase db push` or push to GitHub to apply
+2. Decide whether the table is shared across apps or app-specific
+3. Define RLS policies for row-level security
+4. Run `supabase db push` or push to GitHub to apply
 
 ### Deploy to Cloudflare Pages
 
@@ -218,7 +235,9 @@ Environment variables needed in GitHub Secrets:
 
 **App not building:** Check that `apps/<name>/package.json` has correct workspace reference and that all env vars are set.
 
-**Auth not working:** Verify Supabase URL and anon key are correct in `.env.local`. Check RLS policies allow the operation.
+**Auth not working:** Verify Supabase URL and anon key are correct in `.env.local`. Confirm the app's domain is configured in Supabase redirect/auth settings, and check RLS policies allow the operation.
+
+**Users can log into one app but not another:** This is expected unless both apps are correctly configured against the same Supabase project and each app has its own valid auth redirect URLs.
 
 **Deploy failing:** Check Cloudflare Pages build settings match the npm scripts. Ensure `apps/web/dist` exists after build.
 
@@ -229,5 +248,6 @@ Environment variables needed in GitHub Secrets:
 1. **Preserve adapter pattern** — don't call vendor SDKs directly from app code
 2. **Keep domain framework-free** — business logic has no imports from ui/ or adapters/
 3. **One concern per file** — use cases handle business logic, adapters handle vendor integration
-4. **Document changes** — if you modify infrastructure, update the relevant doc in `docs/`
-5. **Test before deploy** — always run `npm run build` and `npm run test` before suggesting deployment
+4. **Model shared identity explicitly** — shared tables use `auth.users.id`; app-specific tables include explicit app scoping
+5. **Document changes** — if you modify infrastructure, update the relevant doc in `docs/`
+6. **Test before deploy** — always run `npm run build` and `npm run test` before suggesting deployment
