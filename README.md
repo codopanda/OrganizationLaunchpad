@@ -46,12 +46,12 @@ That starter uses plain TypeScript and the shared auth Web Components, so the lo
 
 ### MVP
 
-Get people to be able to create vibecoded apps through GitHub, and have them auto deployed to Cloudflare Pages.
+Get people to be able to create vibecoded apps through GitHub, and have them auto deployed to Cloudflare Pages/Vercel.
 
 Core stack:
 
 - GitHub
-- Cloudflare Pages
+- Cloudflare Pages/Vercel
 - Supabase
 
 ### V1: Lovable Export
@@ -61,11 +61,11 @@ Get people to be able to go from their Lovable app to this repo.
 - instructions on how to copy code from Lovable to local
 - bring the app into this repo
 - push to GitHub
-- auto deploy to Cloudflare Pages
+- auto deploy to Cloudflare Pages/Vercel
 
 ### V2: Better Login
 
-Get people to be able to create users for their apps through Supabase login and Cloudflare Pages.
+Get people to be able to create users for their apps through Supabase login and Cloudflare Pages/Vercel.
 
 Additional service:
 
