@@ -10,6 +10,8 @@ jobs:
   lint-and-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    env:
+      APP_WORKSPACE: ${{ vars.APP_WORKSPACE || 'web' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -25,11 +27,13 @@ jobs:
         run: npm run lint
       
       - name: Type check web
-        run: npm run check -w web
+        run: npm run check -w $APP_WORKSPACE
 
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    env:
+      APP_WORKSPACE: ${{ vars.APP_WORKSPACE || 'web' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -42,11 +46,13 @@ jobs:
       - run: npm ci
       
       - name: Run unit tests
-        run: npm run test -w web
+        run: npm run test -w $APP_WORKSPACE
 
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
+    env:
+      APP_WORKSPACE: ${{ vars.APP_WORKSPACE || 'web' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -62,12 +68,14 @@ jobs:
         run: npx playwright install --with-deps chromium
       
       - name: Run E2E tests
-        run: npm run test:e2e -w web
+        run: npm run test:e2e -w $APP_WORKSPACE
 
   build:
     name: Build
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck, test]
+    env:
+      APP_WORKSPACE: ${{ vars.APP_WORKSPACE || 'web' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -80,4 +88,4 @@ jobs:
       - run: npm ci
       
       - name: Build web
-        run: npm run build -w web
+        run: npm run build -w $APP_WORKSPACE

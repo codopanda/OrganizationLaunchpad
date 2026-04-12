@@ -9,6 +9,9 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
+    env:
+      APP_WORKSPACE: ${{ vars.APP_WORKSPACE || 'web' }}
+      APP_DIST_DIR: ${{ vars.APP_DIST_DIR || 'apps/web/dist' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +24,7 @@ jobs:
       - run: npm ci
 
       - name: Build
-        run: npm run build -w web
+        run: npm run build -w $APP_WORKSPACE
         env:
           VITE_PUBLIC_SUPABASE_URL: ${{ vars.VITE_PUBLIC_SUPABASE_URL }}
           VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -32,7 +35,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'web' }}
-          directory: apps/web/dist
+          directory: ${{ env.APP_DIST_DIR }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-edge-functions:

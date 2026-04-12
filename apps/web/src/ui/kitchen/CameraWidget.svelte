@@ -46,7 +46,7 @@
 	});
 </script>
 
-<div class="camera-widget">
+<div class="camera-widget" role="region" aria-label="Camera widget">
 	{#if error}
 		<p class="error">{error}</p>
 	{:else if capturedImage}

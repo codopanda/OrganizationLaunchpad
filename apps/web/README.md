@@ -2,7 +2,7 @@
 
 Svelte + Vite static site. Build output: `dist/`. Tauri desktop shell lives in `src-tauri/`.
 
-This app is now the reference consumer of the shared auth shell in `shared/auth`. It does not own login/signup logic anymore.
+This app is now the reference consumer of the shared auth shell in `shared/auth`. It is the primary external-test target for the current beta and does not own login/signup logic anymore.
 
 ## Commands
 

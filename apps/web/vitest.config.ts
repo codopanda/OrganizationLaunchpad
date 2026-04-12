@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'url';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 const alias = (path: string) => ({
   find: `@/${path}`,
@@ -7,8 +8,13 @@ const alias = (path: string) => ({
 });
 
 export default defineConfig({
+  plugins: [svelte()],
   resolve: {
     alias: [
+      {
+        find: '@shared',
+        replacement: fileURLToPath(new URL('../../shared', import.meta.url)),
+      },
       alias(''),
       alias('domain'),
       alias('application'),
@@ -26,7 +32,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/domain/**', 'src/application/**', 'src/adapters/**', 'src/lib/**'],
+      include: ['src/domain/**', 'src/lib/**', '../../shared/auth/**'],
       exclude: ['src/**/*.d.ts', 'src/test/**', 'src/main.ts'],
     },
   },

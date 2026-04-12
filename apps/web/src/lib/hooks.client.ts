@@ -1,4 +1,5 @@
 export async function registerServiceWorker(): Promise<void> {
+  if (!import.meta.env.PROD) return;
   if (!('serviceWorker' in navigator)) return;
 
   try {
