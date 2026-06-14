@@ -1,4 +1,3 @@
-/// <reference types="svelte" />
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
@@ -17,19 +16,22 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-declare namespace svelteHTML {
-  interface IntrinsicElements {
-    'organization-launchpad-auth-form': {
-      mode?: 'login' | 'signup';
-      'success-path'?: string;
-    };
-    'organization-launchpad-auth-guard': {
-      heading?: string;
-      message?: string;
-    };
-    'organization-launchpad-auth-callback': {
-      'success-path'?: string;
-      'fallback-path'?: string;
-    };
+// Custom web components from @shared/auth
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'organization-launchpad-auth-form': React.HTMLAttributes<HTMLElement> & {
+        mode?: 'login' | 'signup';
+        'success-path'?: string;
+      };
+      'organization-launchpad-auth-guard': React.HTMLAttributes<HTMLElement> & {
+        heading?: string;
+        message?: string;
+      };
+      'organization-launchpad-auth-callback': React.HTMLAttributes<HTMLElement> & {
+        'success-path'?: string;
+        'fallback-path'?: string;
+      };
+    }
   }
 }

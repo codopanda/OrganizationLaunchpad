@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'url'
 
 const alias = (path: string) => ({
@@ -8,7 +8,7 @@ const alias = (path: string) => ({
 })
 
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [react()],
   resolve: {
     alias: [
       {
