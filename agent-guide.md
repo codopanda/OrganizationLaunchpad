@@ -37,7 +37,7 @@ Ask the user:
 >
 > - **Deploy** — Put your app on the internet (Vercel or Cloudflare Pages)
 > - **Accounts** — User login and a database (Supabase)
-> - **Payments** — Accept money from users (Stripe)
+> - **Payments** — Accept money from users (Stripe or Every.org)
 > - **Email** — Send verification and transactional emails (Resend)
 > - **Analytics** — Track how users use your app (PostHog)
 
@@ -52,7 +52,7 @@ Services depend on each other. Always follow this order regardless of what the u
 ```
 1. Deploy (Vercel or Cloudflare) — all other keys go here
 2. Accounts (Supabase)           — keys go into deploy platform
-3. Payments (Stripe)             — keys go into deploy platform
+3. Payments (Stripe or Every.org) — keys or provider settings go into deploy platform
 4. Email (Resend)                — SMTP settings go into Supabase; API key into deploy platform
 5. Analytics (PostHog)           — project key goes into deploy platform
 ```
@@ -85,13 +85,20 @@ After finishing, paste the Supabase keys into the deploy platform:
 
 ### Payments
 
-Fetch and follow:
+Ask which payment provider the user wants:
+
+- **Stripe** — subscriptions, checkout, billing portal, and webhooks
+- **Every.org** — donation-focused payment flows; start at `https://www.every.org/signup?redirectUrl=%2Fdeveloper&title=Sign+up`
+
+For Stripe, fetch and follow:
 `https://raw.githubusercontent.com/codopanda/OrganizationLaunchpad/main/guides/payments-stripe.md`
 
 After finishing, paste into the deploy platform:
 - `STRIPE_PUBLISHABLE_KEY` (public — safe for frontend)
 - `STRIPE_SECRET_KEY` (secret — server only)
 - `STRIPE_WEBHOOK_SECRET` (secret — server only)
+
+For Every.org, open the developer signup URL above, have the user complete any account/login steps, and document the selected integration details in `docs/api-keys/every-org.md` or the app-specific setup notes before wiring code.
 
 ### Email
 
@@ -121,7 +128,7 @@ After all chosen services are set up:
 2. Visit the live URL
 3. Test each service that was configured:
    - **Accounts** — sign up with a new email address, confirm the email arrives, log in
-   - **Payments** — run a test checkout using Stripe card number `4242 4242 4242 4242`
+   - **Payments** — run a provider-specific test checkout or donation flow; for Stripe, use card number `4242 4242 4242 4242`
    - **Email** — confirm the verification or welcome email arrived
    - **Analytics** — open PostHog and confirm an event appears within 30 seconds
 4. Tell the user what passed and what to check if something did not work

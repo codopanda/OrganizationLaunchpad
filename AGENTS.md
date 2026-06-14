@@ -118,14 +118,34 @@ git push → GitHub Actions →
 
 ## How To...
 
+### Select technologies for a new app
+
+When the user asks to create, import, or scaffold an app and has not already chosen a stack, prompt them interactively before writing code. Use the closest available interactive mechanism:
+
+- If the client supports structured prompts or quick-pick style input, ask the user to select from options.
+- Otherwise, ask a concise numbered question in chat and wait for the answer.
+
+Collect only the decisions that affect the initial scaffold:
+
+1. App type: static site, Svelte app, React app, full-stack app, or desktop-enabled app
+2. Frontend framework: default to the existing repo stack (`Svelte + Vite`) unless the user chooses otherwise
+3. Styling approach: existing app styles, Tailwind, plain CSS, or another specified design system
+4. Backend/data needs: Supabase-only, Cloudflare Worker/API routes, external API integration, or none
+5. Auth requirement: shared auth shell, public-only app, or custom auth adapter
+6. Payment provider, if payments are needed: Stripe, Every.org (`https://www.every.org/signup?redirectUrl=%2Fdeveloper&title=Sign+up`), another provider, or none
+7. Deployment target: Cloudflare Pages static deploy, Pages with Functions/Workers, or local-only prototype
+
+Keep the prompt lightweight, similar to a CLI project generator: show recommended defaults, allow "use defaults", and do not ask about choices that are already implied by the user's request. After the user selects technologies, summarize the chosen stack in the implementation plan and make the scaffold match those choices.
+
 ### Add a new app to `apps/`
 
-1. Create `apps/<new-app>/`
-2. Point it at the shared Supabase project unless the app truly needs isolation
-3. Follow the adapter pattern (see above)
-4. Reuse the same auth flow, but assume users may need to sign in separately on that app's domain
-5. Add migration if you need new database tables
-6. Update `.github/workflows/deploy.yml` if needed
+1. Run the interactive technology selection step above if the stack is not already explicit
+2. Create `apps/<new-app>/`
+3. Point it at the shared Supabase project unless the app truly needs isolation
+4. Follow the adapter pattern (see above)
+5. Reuse the same auth flow, but assume users may need to sign in separately on that app's domain
+6. Add migration if you need new database tables
+7. Update `.github/workflows/deploy.yml` if needed
 
 ### Wire up a new service
 
@@ -270,6 +290,7 @@ Adapters implement the ports defined in the application layer. Examples:
 - PostHog adapter for analytics
 - Resend adapter for transactional email
 - Stripe adapter for payments
+- Every.org adapter or redirect flow for donation-focused payments
 
 Adapters are the only place vendor-specific code belongs.
 

@@ -1,6 +1,6 @@
 # API Keys and Credentials
 
-> **MVP Status:** Supabase, Cloudflare, and Google OAuth are configured in the MVP. PostHog, Stripe, Resend, and Terraform are documented but coming soon.
+> **MVP Status:** Supabase, Cloudflare, and Google OAuth are configured in the MVP. PostHog, Stripe, Every.org, Resend, and Terraform are documented but coming soon.
 
 ---
 
@@ -16,12 +16,13 @@ Use this directory to document every external service the scaffold supports.
 
 ## Coming Soon
 
-| Service   | Purpose                    | Doc                            |
-| --------- | -------------------------- | ------------------------------ |
-| PostHog   | Analytics + error tracking | [posthog.md](./posthog.md)     |
-| Stripe    | Payments + subscriptions   | [stripe.md](./stripe.md)       |
-| Resend    | Transactional email        | [resend.md](./resend.md)       |
-| Terraform | Cloudflare DNS automation  | [terraform.md](./terraform.md) |
+| Service   | Purpose                          | Doc                              |
+| --------- | -------------------------------- | -------------------------------- |
+| PostHog   | Analytics + error tracking       | [posthog.md](./posthog.md)       |
+| Stripe    | Payments + subscriptions         | [stripe.md](./stripe.md)         |
+| Every.org | Donation-focused payment options | [every-org.md](./every-org.md)   |
+| Resend    | Transactional email              | [resend.md](./resend.md)         |
+| Terraform | Cloudflare DNS automation        | [terraform.md](./terraform.md)   |
 
 ---
 
@@ -59,5 +60,7 @@ Ownership:
 
 Rotation notes:
 ```
+
+For payment providers, also include the provider-specific integration template when available. Every.org has a copyable app setup template in [every-org.md](./every-org.md).
 
 This documentation is intentionally part of the scaffold because operational setup is one of the main things vibecoded apps usually omit.
