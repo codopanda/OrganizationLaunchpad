@@ -3,107 +3,120 @@
   import CameraWidget from '@/ui/kitchen/CameraWidget.svelte';
   import NotificationWidget from '@/ui/kitchen/NotificationWidget.svelte';
   import FeedbackWidget from '@/ui/kitchen/FeedbackWidget.svelte';
+  import StripeWidget from '@/ui/kitchen/StripeWidget.svelte';
+  import PostHogWidget from '@/ui/kitchen/PostHogWidget.svelte';
+  import EmailWidget from '@/ui/kitchen/EmailWidget.svelte';
 
   let alarmComplete = $state(false);
-  let cameraActive = $state(false);
-  let notificationCount = $state(0);
   let feedbackSubmitted = $state(false);
 
-  function handleAlarmComplete() {
-    alarmComplete = true;
-    setTimeout(() => (alarmComplete = false), 3000);
+  function navigate(path: string) {
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }
-
-  function handleCameraToggle() {
-    cameraActive = !cameraActive;
-  }
-
-  function handleNotification() {
-    notificationCount++;
-    setTimeout(() => (notificationCount = Math.max(0, notificationCount - 1)), 5000);
-  }
-
-  function handleFeedbackSubmit() {
-    feedbackSubmitted = true;
-    setTimeout(() => (feedbackSubmitted = false), 3000);
-  }
-
-  let widgetCount = $derived(4);
 </script>
 
 <div class="kitchen-page">
   <header class="header">
-    <h1>Kitchen App Demo</h1>
-    <p class="subtitle">Showcasing modular kitchen widgets</p>
+    <div class="header-left">
+      <button class="back-btn" onclick={() => navigate('/')}>← Home</button>
+      <div>
+        <h1>Kitchen Sink</h1>
+        <p class="subtitle">Every integration, all in one place</p>
+      </div>
+    </div>
+    <button class="btn-ghost" onclick={() => navigate('/dashboard')}>Dashboard →</button>
   </header>
 
   <main class="grid">
+    <!-- Business services -->
     <section class="card">
-      <h2>Alarm Widget</h2>
-      <AlarmWidget initialSeconds={10} onComplete={handleAlarmComplete} />
-      {#if alarmComplete}
-        <p class="status success">Alarm completed!</p>
-      {/if}
+      <StripeWidget />
     </section>
 
     <section class="card">
-      <h2>Camera Widget</h2>
-      <CameraWidget />
-      <p class="status" class:active={cameraActive}>
-        Camera is {cameraActive ? 'active' : 'inactive'}
-      </p>
+      <PostHogWidget />
     </section>
 
     <section class="card">
-      <h2>Notification Widget</h2>
-      <NotificationWidget />
-      <p class="status">
-        Notifications: {notificationCount} pending
-      </p>
+      <EmailWidget />
     </section>
 
     <section class="card">
-      <h2>Feedback Widget</h2>
-      <FeedbackWidget onSuccess={handleFeedbackSubmit} />
+      <FeedbackWidget onSuccess={() => (feedbackSubmitted = true)} />
       {#if feedbackSubmitted}
-        <p class="status success">Thank you for your feedback!</p>
+        <p class="status success">Feedback saved to Supabase!</p>
       {/if}
+    </section>
+
+    <!-- Device / browser capabilities -->
+    <section class="card">
+      <h3>Timer</h3>
+      <AlarmWidget initialSeconds={10} onComplete={() => (alarmComplete = true)} />
+      {#if alarmComplete}
+        <p class="status success">Done!</p>
+      {/if}
+    </section>
+
+    <section class="card">
+      <h3>Camera</h3>
+      <CameraWidget />
+    </section>
+
+    <section class="card">
+      <h3>Notifications</h3>
+      <NotificationWidget />
     </section>
   </main>
-
-  <footer class="footer">
-    <p>{widgetCount} widgets available</p>
-  </footer>
 </div>
 
 <style>
   .kitchen-page {
     min-height: 100vh;
     background: var(--bg);
-    padding: 0;
   }
 
   .header {
-    padding: 2rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .header h1 {
-    margin: 0;
-    font-size: 1.75rem;
-  }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
 
-  .subtitle {
-    margin: 0.5rem 0 0;
+  .back-btn {
+    background: none;
+    border: none;
     color: var(--muted);
     font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.25rem;
   }
+
+  .back-btn:hover { color: var(--text); }
+
+  h1 { margin: 0; font-size: 1.25rem; }
+
+  .subtitle { margin: 0.125rem 0 0; color: var(--muted); font-size: 0.8rem; }
+
+  .btn-ghost {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .btn-ghost:hover { color: var(--text); }
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
     padding: 2rem;
     max-width: 1400px;
@@ -117,11 +130,7 @@
     background: var(--surface);
   }
 
-  .card h2 {
-    margin: 0 0 1rem;
-    font-size: 1rem;
-    color: var(--text);
-  }
+  .card h3 { margin: 0 0 1rem; font-size: 1rem; }
 
   .status {
     margin: 1rem 0 0;
@@ -129,44 +138,15 @@
     border-radius: 6px;
     font-size: 0.875rem;
     text-align: center;
-    background: var(--bg);
-    color: var(--muted);
-  }
-
-  .status.active {
-    color: var(--success);
-    background: rgba(34, 197, 94, 0.1);
   }
 
   .status.success {
-    color: var(--success);
-    background: rgba(34, 197, 94, 0.1);
-  }
-
-  .footer {
-    padding: 1rem 2rem;
-    text-align: center;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.875rem;
-  }
-
-  .footer p {
-    margin: 0;
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
   }
 
   @media (max-width: 640px) {
-    .header {
-      padding: 1.5rem 1rem;
-    }
-
-    .header h1 {
-      font-size: 1.5rem;
-    }
-
-    .grid {
-      padding: 1rem;
-      gap: 1rem;
-    }
+    .header { padding: 1rem; }
+    .grid { padding: 1rem; gap: 1rem; }
   }
 </style>

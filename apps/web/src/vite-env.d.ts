@@ -3,8 +3,14 @@
 
 interface ImportMetaEnv {
   readonly VITE_PUBLIC_API_URL?: string;
+  // Supabase
   readonly VITE_PUBLIC_SUPABASE_URL?: string;
   readonly VITE_PUBLIC_SUPABASE_ANON_KEY?: string;
+  // Stripe
+  readonly VITE_PUBLIC_STRIPE_PRICE_ID?: string;
+  // PostHog
+  readonly VITE_PUBLIC_POSTHOG_KEY?: string;
+  readonly VITE_PUBLIC_POSTHOG_HOST?: string;
 }
 
 interface ImportMeta {

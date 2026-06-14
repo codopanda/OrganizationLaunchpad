@@ -6,11 +6,13 @@ Turn AI-generated "vibecoded" apps into production-ready SaaS. Bring your fronte
 
 ## Quick Start
 
-Open your favorite agent (Cursor, Claude, Codex etc), and give it this prompt:
+Open your favorite agent (Cursor, Claude, Codex etc) **inside your existing project**, and give it this prompt:
 
 (Note it's always a good idea to read through random markdown files you give your agent to make sure it's not doing anything malicious)
 
 > Read and follow this guide: https://raw.githubusercontent.com/codopanda/OrganizationLaunchpad/refs/heads/main/agent-guide.md
+
+No cloning required. The agent fetches the guide, reads your existing project, asks which services you want to add, and walks you through each one step by step — opening the right pages in your browser, telling you exactly what to click, and wiring the API keys together across services.
 
 ## What You Get
 
